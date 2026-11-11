@@ -57,7 +57,10 @@ function AuthPage() {
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       navigate({ to: "/admin" });
     } else {
       const { data, error } = await supabase.auth.signUp({
@@ -66,7 +69,10 @@ function AuthPage() {
         options: { emailRedirectTo: window.location.origin + "/auth", data: { display_name: name.trim() } },
       });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       if (data.session) navigate({ to: "/admin" });
       else setCheckEmail(true);
     }
@@ -74,7 +80,10 @@ function AuthPage() {
 
   async function social(provider: "google" | "lovable") {
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin + "/auth" });
-    if (result.error) return toast.error(result.error.message);
+    if (result.error) {
+      toast.error(result.error.message);
+      return;
+    }
     if (result.redirected) return;
     navigate({ to: "/admin" });
   }

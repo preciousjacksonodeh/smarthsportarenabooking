@@ -52,8 +52,14 @@ function RegisterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!session) return toast.error("Pick a session.");
-    if (!paymentType) return toast.error("Choose how you'll pay.");
+    if (!session) {
+      toast.error("Pick a session.");
+      return;
+    }
+    if (!paymentType) {
+      toast.error("Choose how you'll pay.");
+      return;
+    }
     setSubmitting(true);
     const { data, error } = await supabase.rpc("register_player", {
       _full_name: fullName,
