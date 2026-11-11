@@ -36,9 +36,9 @@ export const Route = createFileRoute("/ticket/$ref")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Your court pass — Courtside" },
-      { name: "description", content: "Your Courtside session pass with QR code, check-in code and payment status." },
-      { property: "og:title", content: "Your court pass — Courtside" },
+      { title: "Your court pass — Smart Arena" },
+      { name: "description", content: "Your Smart Arena session pass with QR code, check-in code and payment status." },
+      { property: "og:title", content: "Your court pass — Smart Arena" },
       { property: "og:description", content: "Show this QR pass at the court to check in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -130,6 +130,7 @@ function TicketPage() {
           <header className="court-surface px-6 pb-6 pt-7">
             <p className="eyebrow text-accent">{formatSessionDate(t.session_date)}</p>
             <h1 className="font-display mt-2 text-4xl">{sessionLabel(t.session)}</h1>
+            <p className="font-display mt-1 text-2xl text-accent">{formatPlayTime(t.play_time)}</p>
             <p className="mt-3 text-lg font-semibold">{t.full_name}</p>
             <p className="text-sm text-court-foreground/70">{t.phone}</p>
           </header>
@@ -137,6 +138,9 @@ function TicketPage() {
           <div className="flex flex-wrap items-center gap-2 px-6 pt-5">
             <PaymentStatusPill status={t.payment_status} />
             <CheckinStatusPill status={t.checkin_status} />
+            <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
+              {MEMBERSHIP_LABEL[t.membership]} · {formatMoney(t.amount_ngn)}
+            </span>
             <span className="ml-auto text-xs text-muted-foreground">{PAYMENT_TYPE_LABEL[t.payment_type]}</span>
           </div>
 
@@ -255,7 +259,7 @@ function AdminTicketPanel({ qrRef }: { qrRef: string }) {
         )}
         {a.recordCash && (
           <Button variant="outline" disabled={busy} onClick={() => recordCash.mutate(row.id)}>
-            Record {formatMoney(CLUB.price)} cash payment
+            Record {formatMoney(row.amount_ngn)} cash payment
           </Button>
         )}
         {!a.checkIn && !a.confirmTransfer && !a.recordCash && (
