@@ -16,6 +16,7 @@ import {
   CLUB,
   MEMBERSHIP_LABEL,
   PAYMENT_TYPE_LABEL,
+  SPORT_LABEL,
   formatDateTime,
   formatMoney,
   formatPlayTime,
@@ -38,9 +39,9 @@ export const Route = createFileRoute("/ticket/$ref")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Your court pass — Smart Arena" },
-      { name: "description", content: "Your Smart Arena session pass with QR code, check-in code and payment status." },
-      { property: "og:title", content: "Your court pass — Smart Arena" },
+      { title: "Your court pass — Smart Sports Arena" },
+      { name: "description", content: "Your Smart Sports Arena session pass with QR code, check-in code and payment status." },
+      { property: "og:title", content: "Your court pass — Smart Sports Arena" },
       { property: "og:description", content: "Show this QR pass at the court to check in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -130,7 +131,9 @@ function TicketPage() {
 
         <article className="overflow-hidden rounded-2xl border bg-card shadow-ticket animate-pop-in">
           <header className="court-surface px-6 pb-6 pt-7">
-            <p className="eyebrow text-accent">{formatSessionDate(t.session_date)}</p>
+            <p className="eyebrow text-accent">
+              {SPORT_LABEL[t.sport]} · {formatSessionDate(t.session_date)}
+            </p>
             <h1 className="font-display mt-2 text-4xl">{sessionLabel(t.session)}</h1>
             <p className="font-display mt-1 text-2xl text-accent">{formatPlayTime(t.play_time)}</p>
             <p className="mt-3 text-lg font-semibold">{t.full_name}</p>

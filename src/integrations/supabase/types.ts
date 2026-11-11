@@ -56,6 +56,7 @@ export type Database = {
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
+          sport: Database["public"]["Enums"]["sport_type"]
           transfer_confirmed_by: string | null
           transfer_confirmed_by_name: string | null
           transfer_reported_at: string | null
@@ -81,6 +82,7 @@ export type Database = {
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
+          sport?: Database["public"]["Enums"]["sport_type"]
           transfer_confirmed_by?: string | null
           transfer_confirmed_by_name?: string | null
           transfer_reported_at?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           qr_reference?: string
           session?: Database["public"]["Enums"]["session_slot"]
           session_date?: string
+          sport?: Database["public"]["Enums"]["sport_type"]
           transfer_confirmed_by?: string | null
           transfer_confirmed_by_name?: string | null
           transfer_reported_at?: string | null
@@ -168,6 +171,7 @@ export type Database = {
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
+          sport: Database["public"]["Enums"]["sport_type"]
           transfer_reported_at: string
         }[]
       }
@@ -190,6 +194,7 @@ export type Database = {
           _phone: string
           _play_time: string
           _session: Database["public"]["Enums"]["session_slot"]
+          _sport: Database["public"]["Enums"]["sport_type"]
         }
         Returns: string
       }
@@ -206,7 +211,15 @@ export type Database = {
         | "AWAITING_CASH"
         | "PAID"
       payment_type: "BANK_TRANSFER" | "CASH_AT_COURT"
-      session_slot: "TUESDAY_5PM" | "THURSDAY_5PM" | "SATURDAY" | "SUNDAY"
+      session_slot:
+        | "MONDAY"
+        | "TUESDAY_5PM"
+        | "WEDNESDAY"
+        | "THURSDAY_5PM"
+        | "FRIDAY"
+        | "SATURDAY"
+        | "SUNDAY"
+      sport_type: "BASKETBALL" | "FOOTBALL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -344,7 +357,16 @@ export const Constants = {
         "PAID",
       ],
       payment_type: ["BANK_TRANSFER", "CASH_AT_COURT"],
-      session_slot: ["TUESDAY_5PM", "THURSDAY_5PM", "SATURDAY", "SUNDAY"],
+      session_slot: [
+        "MONDAY",
+        "TUESDAY_5PM",
+        "WEDNESDAY",
+        "THURSDAY_5PM",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY",
+      ],
+      sport_type: ["BASKETBALL", "FOOTBALL"],
     },
   },
 } as const

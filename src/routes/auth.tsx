@@ -16,10 +16,10 @@ import { meQueryOptions } from "@/lib/auth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Admin sign in — Smart Arena" },
-      { name: "description", content: "Sign in to the Smart Arena admin dashboard to confirm payments and check players in." },
-      { property: "og:title", content: "Admin sign in — Smart Arena" },
-      { property: "og:description", content: "Smart Arena admin dashboard sign in." },
+      { title: "Admin sign in — Smart Sports Arena" },
+      { name: "description", content: "Sign in to the Smart Sports Arena admin dashboard to confirm payments and check players in." },
+      { property: "og:title", content: "Admin sign in — Smart Sports Arena" },
+      { property: "og:description", content: "Smart Sports Arena admin dashboard sign in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

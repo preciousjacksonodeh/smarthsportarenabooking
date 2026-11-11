@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Building2, Clock, Loader2, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, Banknote, Building2, Clock, Dribbble, Loader2, ShieldCheck, Trophy, Users } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { Button } from "@/components/ui/button";
@@ -12,29 +12,30 @@ import {
   CLUB,
   MEMBERSHIP_HINT,
   MEMBERSHIP_LABEL,
-  MEMBERSHIP_PRICES,
   MEMBERSHIPS,
   OPENING_HOURS,
   PLAY_TIMES,
   SESSIONS,
-  formatMoney,
+  SPORT_LABEL,
+  SPORTS,
   hourLabel,
   type MembershipType,
   type PaymentType,
   type SessionSlot,
+  type SportType,
 } from "@/lib/club";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Register for a court session — Smart Arena" },
+      { title: "Register for a court session — Smart Sports Arena" },
       {
         name: "description",
         content:
-          "Smart Arena is open 7:00 AM to 10:00 PM. Pick your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass. ₦1,000 for old timers, ₦2,000 for new members.",
+          "Smart Sports Arena is open 7:00 AM to 10:00 PM. Pick basketball or football, your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass.",
       },
-      { property: "og:title", content: "Register for a court session — Smart Arena" },
+      { property: "og:title", content: "Register for a court session — Smart Sports Arena" },
       {
         property: "og:description",
         content: "Pick your day and playing time, pay by transfer or cash, and get your QR check-in pass in seconds.",
@@ -46,11 +47,10 @@ export const Route = createFileRoute("/")({
   component: RegisterPage,
 });
 
-const DOW: Record<SessionSlot, number> = { TUESDAY_5PM: 2, THURSDAY_5PM: 4, SATURDAY: 6, SUNDAY: 0 };
-
 function nextDateLabel(slot: SessionSlot) {
   const lagosToday = new Date(new Date().toLocaleString("en-US", { timeZone: "Africa/Lagos" }));
-  const diff = (DOW[slot] - lagosToday.getDay() + 7) % 7;
+  const dow = SESSIONS.find((s) => s.value === slot)?.dow ?? 0;
+  const diff = (dow - lagosToday.getDay() + 7) % 7;
   const d = new Date(lagosToday);
   d.setDate(d.getDate() + diff);
   if (diff === 0) return "Today";
@@ -61,16 +61,19 @@ function RegisterPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [sport, setSport] = useState<SportType | null>(null);
   const [session, setSession] = useState<SessionSlot | null>(null);
   const [playTime, setPlayTime] = useState<string | null>(null);
   const [membership, setMembership] = useState<MembershipType | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const price = membership ? MEMBERSHIP_PRICES[membership] : null;
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!sport) {
+      toast.error("Pick basketball or football.");
+      return;
+    }
     if (!session) {
       toast.error("Pick a day.");
       return;
@@ -95,6 +98,7 @@ function RegisterPage() {
       _payment_type: paymentType,
       _membership: membership,
       _play_time: playTime,
+      _sport: sport,
     });
     setSubmitting(false);
     if (error || !data) {
@@ -123,15 +127,13 @@ function RegisterPage() {
             spot on <span className="text-accent">court.</span>
           </h1>
           <p className="mt-6 max-w-sm text-lg text-court-foreground/80">
-            Choose your day and playing time, pay by transfer or cash, and show your QR pass at the gate.
+            Choose basketball or football, your day and playing time, pay by transfer or cash, and show your QR pass at the gate.
           </p>
           <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-court-foreground">
-            <span>
-              {MEMBERSHIP_LABEL.OLD_TIMER} · {formatMoney(MEMBERSHIP_PRICES.OLD_TIMER)}
-            </span>
-            <span>
-              {MEMBERSHIP_LABEL.NEW_MEMBER} · {formatMoney(MEMBERSHIP_PRICES.NEW_MEMBER)}
-            </span>
+            {SPORTS.map((sp) => (
+              <span key={sp}>{SPORT_LABEL[sp]}</span>
+            ))}
+            <span>Monday – Sunday</span>
           </p>
         </div>
 
@@ -182,8 +184,34 @@ function RegisterPage() {
           </div>
 
           <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold">Which sport?</legend>
+            <div role="radiogroup" aria-label="Sport" className="grid grid-cols-2 gap-3">
+              {SPORTS.map((sp) => {
+                const active = sport === sp;
+                const Icon = sp === "BASKETBALL" ? Dribbble : Trophy;
+                return (
+                  <button
+                    key={sp}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setSport(sp)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border-2 bg-card p-4 text-left transition-all",
+                      active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
+                    )}
+                  >
+                    <Icon className={cn("size-6 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
+                    <span className="font-display text-lg">{SPORT_LABEL[sp]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-3">
             <legend className="text-sm font-semibold">Which day?</legend>
-            <div role="radiogroup" aria-label="Session day" className="grid grid-cols-2 gap-3">
+            <div role="radiogroup" aria-label="Session day" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {SESSIONS.map((s) => {
                 const active = session === s.value;
                 return (
@@ -194,15 +222,12 @@ function RegisterPage() {
                     aria-checked={active}
                     onClick={() => setSession(s.value)}
                     className={cn(
-                      "rounded-lg border-2 bg-card p-4 text-left transition-all",
+                      "rounded-lg border-2 bg-card px-3 py-3 text-left transition-all",
                       active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
                     )}
                   >
-                    <span className="font-display block text-lg">{s.day}</span>
-                    <span className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-                      <span>Next session</span>
-                      <span className="font-mono text-xs">{nextDateLabel(s.value)}</span>
-                    </span>
+                    <span className="font-display block text-base">{s.day}</span>
+                    <span className="mt-0.5 block font-mono text-xs text-muted-foreground">{nextDateLabel(s.value)}</span>
                   </button>
                 );
               })}
@@ -262,9 +287,7 @@ function RegisterPage() {
                   >
                     <Users className={cn("mt-0.5 size-5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
                     <span>
-                      <span className="block font-semibold">
-                        {MEMBERSHIP_LABEL[m]} · {formatMoney(MEMBERSHIP_PRICES[m])}
-                      </span>
+                      <span className="block font-semibold">{MEMBERSHIP_LABEL[m]}</span>
                       <span className="text-sm text-muted-foreground">{MEMBERSHIP_HINT[m]}</span>
                     </span>
                   </button>
@@ -308,7 +331,7 @@ function RegisterPage() {
 
           <Button type="submit" variant="hero" size="xl" className="w-full" disabled={submitting}>
             {submitting ? <Loader2 className="animate-spin" /> : null}
-            {price ? `Pay ${formatMoney(price)} · Get my pass` : "Get my pass"}
+            Get my pass
             <ArrowRight />
           </Button>
 
