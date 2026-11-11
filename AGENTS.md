@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- All player registrations and payments (transfer and cash) live in the single `public.registrations` table; writes go only through SECURITY DEFINER RPCs (register_player, report_transfer_sent, change_payment_type, admin_*) so status transitions and "recorded by" names are enforced server-side, never by direct table updates from the browser.
+- Admin rights come from `public.user_roles` (`has_role`); the first account ever created becomes admin, later admins are granted from the dashboard Staff tab.
+- Club name, price and bank details live in `src/lib/club.ts`; UI never hardcodes them.
+- Admin button availability is decided by `availableActions` in `src/lib/admin-actions.ts` (tested), mirroring the RPC checks.
