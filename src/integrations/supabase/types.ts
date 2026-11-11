@@ -37,6 +37,7 @@ export type Database = {
       }
       registrations: {
         Row: {
+          amount_ngn: number
           cash_recorded_by: string | null
           cash_recorded_by_name: string | null
           checked_in_at: string | null
@@ -46,10 +47,12 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           payment_type: Database["public"]["Enums"]["payment_type"]
           phone: string
+          play_time: string
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
@@ -59,6 +62,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amount_ngn?: number
           cash_recorded_by?: string | null
           cash_recorded_by_name?: string | null
           checked_in_at?: string | null
@@ -68,10 +72,12 @@ export type Database = {
           created_at?: string
           full_name: string
           id?: string
+          membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           payment_type: Database["public"]["Enums"]["payment_type"]
           phone: string
+          play_time?: string
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
@@ -81,6 +87,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amount_ngn?: number
           cash_recorded_by?: string | null
           cash_recorded_by_name?: string | null
           checked_in_at?: string | null
@@ -90,10 +97,12 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           payment_type?: Database["public"]["Enums"]["payment_type"]
           phone?: string
+          play_time?: string
           qr_reference?: string
           session?: Database["public"]["Enums"]["session_slot"]
           session_date?: string
@@ -144,15 +153,18 @@ export type Database = {
       get_ticket: {
         Args: { _ref: string }
         Returns: {
+          amount_ngn: number
           checked_in_at: string
           checkin_code: string
           checkin_status: Database["public"]["Enums"]["checkin_status"]
           created_at: string
           full_name: string
+          membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string
           payment_status: Database["public"]["Enums"]["payment_status"]
           payment_type: Database["public"]["Enums"]["payment_type"]
           phone: string
+          play_time: string
           qr_reference: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
@@ -173,8 +185,10 @@ export type Database = {
       register_player: {
         Args: {
           _full_name: string
+          _membership: Database["public"]["Enums"]["membership_type"]
           _payment_type: Database["public"]["Enums"]["payment_type"]
           _phone: string
+          _play_time: string
           _session: Database["public"]["Enums"]["session_slot"]
         }
         Returns: string
@@ -185,6 +199,7 @@ export type Database = {
     Enums: {
       app_role: "admin"
       checkin_status: "NOT_CHECKED_IN" | "CHECKED_IN"
+      membership_type: "OLD_TIMER" | "NEW_MEMBER"
       payment_status:
         | "UNPAID"
         | "PENDING_BANK_TRANSFER"
@@ -321,6 +336,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin"],
       checkin_status: ["NOT_CHECKED_IN", "CHECKED_IN"],
+      membership_type: ["OLD_TIMER", "NEW_MEMBER"],
       payment_status: [
         "UNPAID",
         "PENDING_BANK_TRANSFER",

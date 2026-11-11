@@ -1,28 +1,43 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Building2, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowRight, Banknote, Building2, Clock, Loader2, ShieldCheck, Users } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { CLUB, SESSIONS, formatMoney, type PaymentType, type SessionSlot } from "@/lib/club";
+import {
+  CLUB,
+  MEMBERSHIP_HINT,
+  MEMBERSHIP_LABEL,
+  MEMBERSHIP_PRICES,
+  MEMBERSHIPS,
+  OPENING_HOURS,
+  PLAY_TIMES,
+  SESSIONS,
+  formatMoney,
+  hourLabel,
+  type MembershipType,
+  type PaymentType,
+  type SessionSlot,
+} from "@/lib/club";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Register for a court session — Courtside" },
+      { title: "Register for a court session — Smart Arena" },
       {
         name: "description",
-        content: "Pick Tuesday, Thursday, Saturday or Sunday, choose bank transfer or cash at court, and get your QR check-in pass.",
+        content:
+          "Smart Arena is open 7:00 AM to 10:00 PM. Pick your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass. ₦1,000 for old timers, ₦2,000 for new members.",
       },
-      { property: "og:title", content: "Register for a court session — Courtside" },
+      { property: "og:title", content: "Register for a court session — Smart Arena" },
       {
         property: "og:description",
-        content: "Pick your session, choose how to pay, and get your QR check-in pass in seconds.",
+        content: "Pick your day and playing time, pay by transfer or cash, and get your QR check-in pass in seconds.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -47,13 +62,25 @@ function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [session, setSession] = useState<SessionSlot | null>(null);
+  const [playTime, setPlayTime] = useState<string | null>(null);
+  const [membership, setMembership] = useState<MembershipType | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const price = membership ? MEMBERSHIP_PRICES[membership] : null;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session) {
-      toast.error("Pick a session.");
+      toast.error("Pick a day.");
+      return;
+    }
+    if (!playTime) {
+      toast.error("Pick your playing time.");
+      return;
+    }
+    if (!membership) {
+      toast.error("Tell us if you're an old timer or a new member.");
       return;
     }
     if (!paymentType) {
@@ -66,6 +93,8 @@ function RegisterPage() {
       _phone: phone,
       _session: session,
       _payment_type: paymentType,
+      _membership: membership,
+      _play_time: playTime,
     });
     setSubmitting(false);
     if (error || !data) {
@@ -87,14 +116,22 @@ function RegisterPage() {
         </div>
 
         <div className="relative py-14 lg:py-0">
-          <p className="eyebrow text-accent">Weekly sessions · {formatMoney(CLUB.price)}</p>
+          <p className="eyebrow text-accent">Open daily {OPENING_HOURS}</p>
           <h1 className="font-display mt-4 text-5xl sm:text-6xl xl:text-7xl">
             Book your
             <br />
             spot on <span className="text-accent">court.</span>
           </h1>
           <p className="mt-6 max-w-sm text-lg text-court-foreground/80">
-            Register, pay by transfer or cash, and show your QR pass at the gate.
+            Choose your day and playing time, pay by transfer or cash, and show your QR pass at the gate.
+          </p>
+          <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-court-foreground">
+            <span>
+              {MEMBERSHIP_LABEL.OLD_TIMER} · {formatMoney(MEMBERSHIP_PRICES.OLD_TIMER)}
+            </span>
+            <span>
+              {MEMBERSHIP_LABEL.NEW_MEMBER} · {formatMoney(MEMBERSHIP_PRICES.NEW_MEMBER)}
+            </span>
           </p>
         </div>
 
@@ -145,8 +182,8 @@ function RegisterPage() {
           </div>
 
           <fieldset className="space-y-3">
-            <legend className="text-sm font-semibold">Session</legend>
-            <div role="radiogroup" aria-label="Session" className="grid grid-cols-2 gap-3">
+            <legend className="text-sm font-semibold">Which day?</legend>
+            <div role="radiogroup" aria-label="Session day" className="grid grid-cols-2 gap-3">
               {SESSIONS.map((s) => {
                 const active = session === s.value;
                 return (
@@ -163,8 +200,72 @@ function RegisterPage() {
                   >
                     <span className="font-display block text-lg">{s.day}</span>
                     <span className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{s.time ?? "All day"}</span>
+                      <span>Next session</span>
                       <span className="font-mono text-xs">{nextDateLabel(s.value)}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold">Playing time</legend>
+            <div
+              role="radiogroup"
+              aria-label="Playing time"
+              className="grid grid-cols-3 gap-2 sm:grid-cols-5"
+            >
+              {PLAY_TIMES.map((t) => {
+                const active = playTime === t.value;
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setPlayTime(t.value)}
+                    className={cn(
+                      "rounded-lg border-2 px-1 py-2.5 text-center text-sm font-medium transition-all",
+                      active
+                        ? "border-primary bg-secondary text-foreground shadow-ticket"
+                        : "border-border bg-card text-muted-foreground hover:border-primary/40",
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="size-3.5" />
+              Court closes at {hourLabel(CLUB.openTo)} — last playing time is {PLAY_TIMES.at(-1)?.label}.
+            </p>
+          </fieldset>
+
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold">Are you an old timer?</legend>
+            <div role="radiogroup" aria-label="Membership" className="grid gap-3 sm:grid-cols-2">
+              {MEMBERSHIPS.map((m) => {
+                const active = membership === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setMembership(m)}
+                    className={cn(
+                      "flex items-start gap-3 rounded-lg border-2 bg-card p-4 text-left transition-all",
+                      active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
+                    )}
+                  >
+                    <Users className={cn("mt-0.5 size-5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
+                    <span>
+                      <span className="block font-semibold">
+                        {MEMBERSHIP_LABEL[m]} · {formatMoney(MEMBERSHIP_PRICES[m])}
+                      </span>
+                      <span className="text-sm text-muted-foreground">{MEMBERSHIP_HINT[m]}</span>
                     </span>
                   </button>
                 );
@@ -207,7 +308,7 @@ function RegisterPage() {
 
           <Button type="submit" variant="hero" size="xl" className="w-full" disabled={submitting}>
             {submitting ? <Loader2 className="animate-spin" /> : null}
-            Get my pass
+            {price ? `Pay ${formatMoney(price)} · Get my pass` : "Get my pass"}
             <ArrowRight />
           </Button>
 
