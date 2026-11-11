@@ -1,13 +1,34 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { sessionLabel, type SessionSlot } from "@/lib/club";
+import { formatPlayTime, sessionLabel, type SessionSlot } from "@/lib/club";
 
 type CheckInResult =
   | { result: "not_found" }
-  | { result: "not_paid"; id: string; full_name: string; payment_status: string; session: SessionSlot }
-  | { result: "already"; id: string; full_name: string; checked_in_at: string; session: SessionSlot }
-  | { result: "checked_in"; id: string; full_name: string; session: SessionSlot };
+  | {
+      result: "not_paid";
+      id: string;
+      full_name: string;
+      payment_status: string;
+      session: SessionSlot;
+      play_time?: string;
+    }
+  | {
+      result: "already";
+      id: string;
+      full_name: string;
+      checked_in_at: string;
+      session: SessionSlot;
+      play_time?: string;
+    }
+  | {
+      result: "checked_in";
+      id: string;
+      full_name: string;
+      session: SessionSlot;
+      play_time?: string;
+      amount_ngn?: number;
+    };
 
 export function useAdminActions() {
   const qc = useQueryClient();
@@ -50,7 +71,9 @@ export function useAdminActions() {
       refresh();
       switch (res.result) {
         case "checked_in":
-          toast.success(`${res.full_name} checked in · ${sessionLabel(res.session)}`);
+          toast.success(
+            `${res.full_name} checked in · ${sessionLabel(res.session)} ${formatPlayTime(res.play_time ?? null)}`,
+          );
           break;
         case "already":
           toast.warning(`${res.full_name} is already checked in.`);

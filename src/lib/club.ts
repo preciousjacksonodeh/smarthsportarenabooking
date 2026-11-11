@@ -4,31 +4,73 @@ export type SessionSlot = Database["public"]["Enums"]["session_slot"];
 export type PaymentType = Database["public"]["Enums"]["payment_type"];
 export type PaymentStatus = Database["public"]["Enums"]["payment_status"];
 export type CheckinStatus = Database["public"]["Enums"]["checkin_status"];
+export type MembershipType = Database["public"]["Enums"]["membership_type"];
 
-// Placeholder club details — replace with the real ones.
+// Court details. Bank details are placeholders — replace with the real ones.
 export const CLUB = {
-  name: "Courtside",
+  name: "Smart Arena",
   tagline: "Book your spot on court",
-  price: 5000,
   currency: "NGN",
+  openFrom: 7, // first playing hour, 07:00
+  openTo: 22, // court closes, 22:00
+  lastStart: 21, // latest playing time a player can pick, 21:00
   bank: {
     bankName: "Your Bank",
-    accountName: "Courtside Sports Club",
+    accountName: "Smart Arena",
     accountNumber: "0123456789",
   },
 };
 
-export const SESSIONS: { value: SessionSlot; day: string; time?: string }[] = [
-  { value: "TUESDAY_5PM", day: "Tuesday", time: "5 PM" },
-  { value: "THURSDAY_5PM", day: "Thursday", time: "5 PM" },
+// Price per session by membership. The server charges the same way.
+export const MEMBERSHIP_PRICES: Record<MembershipType, number> = {
+  OLD_TIMER: 1000,
+  NEW_MEMBER: 2000,
+};
+
+export const MEMBERSHIP_LABEL: Record<MembershipType, string> = {
+  OLD_TIMER: "Old timer",
+  NEW_MEMBER: "New member",
+};
+
+export const MEMBERSHIP_HINT: Record<MembershipType, string> = {
+  OLD_TIMER: "I've played here before",
+  NEW_MEMBER: "First time at the arena",
+};
+
+export const MEMBERSHIPS: MembershipType[] = ["OLD_TIMER", "NEW_MEMBER"];
+
+export const SESSIONS: { value: SessionSlot; day: string }[] = [
+  { value: "TUESDAY_5PM", day: "Tuesday" },
+  { value: "THURSDAY_5PM", day: "Thursday" },
   { value: "SATURDAY", day: "Saturday" },
   { value: "SUNDAY", day: "Sunday" },
 ];
 
 export function sessionLabel(slot: SessionSlot) {
-  const s = SESSIONS.find((x) => x.value === slot);
-  if (!s) return slot;
-  return s.time ? `${s.day} ${s.time}` : s.day;
+  return SESSIONS.find((x) => x.value === slot)?.day ?? slot;
+}
+
+export function hourLabel(hour: number) {
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const h12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${h12}:00 ${suffix}`;
+}
+
+// Hourly playing times on offer: 7:00 AM through 9:00 PM.
+export const PLAY_TIMES: { value: string; label: string }[] = Array.from(
+  { length: CLUB.lastStart - CLUB.openFrom + 1 },
+  (_, i) => {
+    const hour = CLUB.openFrom + i;
+    return { value: `${String(hour).padStart(2, "0")}:00`, label: hourLabel(hour) };
+  },
+);
+
+export const OPENING_HOURS = `${hourLabel(CLUB.openFrom)} – ${hourLabel(CLUB.openTo)}`;
+
+export function formatPlayTime(time: string | null) {
+  if (!time) return "—";
+  const hour = Number(time.slice(0, 2));
+  return Number.isNaN(hour) ? time : hourLabel(hour);
 }
 
 export const PAYMENT_TYPE_LABEL: Record<PaymentType, string> = {
