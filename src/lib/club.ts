@@ -51,6 +51,14 @@ export const SESSIONS: { value: SessionSlot; day: string; dow: number }[] = [
   { value: "SUNDAY", day: "Sunday", dow: 0 },
 ];
 
+// Academy training runs on these days and hours (shown to players as info only).
+export const ACADEMY = {
+  days: ["FRIDAY", "SATURDAY", "SUNDAY"] as SessionSlot[],
+  dayLabel: "Fridays, Saturdays & Sundays",
+  fromHour: 16,
+  toHour: 18,
+};
+
 export const SPORTS: SportType[] = ["BASKETBALL", "FOOTBALL"];
 
 export const SPORT_LABEL: Record<SportType, string> = {
@@ -76,6 +84,8 @@ export const PLAY_TIMES: { value: string; label: string }[] = Array.from(
     return { value: `${String(hour).padStart(2, "0")}:00`, label: hourLabel(hour) };
   },
 );
+
+export const ACADEMY_HOURS = `${hourLabel(ACADEMY.fromHour)} – ${hourLabel(ACADEMY.toHour)}`;
 
 export const OPENING_HOURS = `${hourLabel(CLUB.openFrom)} – ${hourLabel(CLUB.openTo)}`;
 

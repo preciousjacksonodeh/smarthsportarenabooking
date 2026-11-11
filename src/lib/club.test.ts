@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLUB, MEMBERSHIP_PRICES, OPENING_HOURS, PLAY_TIMES, SESSIONS, SPORT_LABEL, SPORTS, formatPlayTime } from "./club";
+import { ACADEMY, ACADEMY_HOURS, CLUB, MEMBERSHIP_PRICES, OPENING_HOURS, PLAY_TIMES, SESSIONS, SPORT_LABEL, SPORTS, formatPlayTime } from "./club";
 
 describe("Smart Sports Arena pricing and playing hours", () => {
   it("charges old timers ₦1,000 and new members ₦2,000 per session", () => {
@@ -31,5 +31,10 @@ describe("Smart Sports Arena pricing and playing hours", () => {
 
   it("lets players choose basketball or football", () => {
     expect(SPORTS.map((s) => SPORT_LABEL[s])).toEqual(["Basketball", "Football"]);
+  });
+
+  it("lists academy training on Fridays, Saturdays and Sundays, 4:00 PM to 6:00 PM", () => {
+    expect(ACADEMY.days).toEqual(["FRIDAY", "SATURDAY", "SUNDAY"]);
+    expect(ACADEMY_HOURS).toBe("4:00 PM – 6:00 PM");
   });
 });
