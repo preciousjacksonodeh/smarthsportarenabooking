@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Building2, Clock, Dribbble, Loader2, ShieldCheck, Trophy, Users } from "lucide-react";
+import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, ShieldCheck, Trophy, Users } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  ACADEMY,
+  ACADEMY_HOURS,
   CLUB,
   MEMBERSHIP_HINT,
   MEMBERSHIP_LABEL,
@@ -135,6 +137,15 @@ function RegisterPage() {
             ))}
             <span>Monday – Sunday</span>
           </p>
+          <div className="mt-6 inline-flex items-start gap-3 rounded-lg border border-court-foreground/25 px-4 py-3">
+            <CalendarDays className="mt-0.5 size-5 shrink-0 text-accent" />
+            <div>
+              <p className="eyebrow text-accent">Academy training</p>
+              <p className="mt-1 text-sm font-semibold text-court-foreground">
+                {ACADEMY.dayLabel} · {ACADEMY_HOURS}
+              </p>
+            </div>
+          </div>
         </div>
 
         <ol className="hidden gap-6 text-sm text-court-foreground/80 sm:grid sm:grid-cols-3">
@@ -232,6 +243,12 @@ function RegisterPage() {
                 );
               })}
             </div>
+            {session && ACADEMY.days.includes(session) && (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CalendarDays className="size-3.5" />
+                Academy training runs on this day from {ACADEMY_HOURS}.
+              </p>
+            )}
           </fieldset>
 
           <fieldset className="space-y-3">
