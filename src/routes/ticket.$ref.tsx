@@ -161,7 +161,7 @@ function TicketPage() {
                 Show this QR code or your 6-digit code at the court to check in.
               </StateNote>
             ) : t.payment_status === "AWAITING_CASH" ? (
-              <StateNote icon={<Banknote className="text-awaiting" />} title={`Bring ${formatMoney(CLUB.price)} cash`}>
+              <StateNote icon={<Banknote className="text-awaiting" />} title={`Bring ${formatMoney(t.amount_ngn)} cash`}>
                 Pay an admin at the court. They'll record your payment and check you in.
               </StateNote>
             ) : t.payment_status === "PENDING_BANK_TRANSFER" ? (
@@ -170,7 +170,7 @@ function TicketPage() {
               </StateNote>
             ) : (
               <>
-                <StateNote icon={<Building2 className="text-unpaid" />} title={`Transfer ${formatMoney(CLUB.price)}`}>
+                <StateNote icon={<Building2 className="text-unpaid" />} title={`Transfer ${formatMoney(t.amount_ngn)}`}>
                   Use your reference as the transfer description, then tap the button below.
                 </StateNote>
                 <div className="divide-y rounded-lg border bg-muted/50 px-4">

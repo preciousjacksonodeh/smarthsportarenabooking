@@ -18,6 +18,7 @@ import {
   PLAY_TIMES,
   SESSIONS,
   formatMoney,
+  hourLabel,
   type MembershipType,
   type PaymentType,
   type SessionSlot,
