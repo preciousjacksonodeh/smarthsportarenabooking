@@ -15,14 +15,17 @@ import type { Tables } from "@/integrations/supabase/types";
 import { availableActions } from "@/lib/admin-actions";
 import { meQueryOptions } from "@/lib/auth";
 import {
-  CLUB,
+  MEMBERSHIP_LABEL,
+  MEMBERSHIPS,
   PAYMENT_STATUS_LABEL,
   PAYMENT_TYPE_LABEL,
   SESSIONS,
   formatDateTime,
   formatMoney,
+  formatPlayTime,
   formatSessionDate,
   sessionLabel,
+  type MembershipType,
   type PaymentStatus,
   type SessionSlot,
 } from "@/lib/club";
@@ -34,10 +37,10 @@ type Range = "upcoming" | "past" | "all";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — Courtside" },
-      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Courtside session." },
-      { property: "og:title", content: "Admin dashboard — Courtside" },
-      { property: "og:description", content: "Courtside payments and check-in dashboard." },
+      { title: "Admin dashboard — Smart Arena" },
+      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Smart Arena session." },
+      { property: "og:title", content: "Admin dashboard — Smart Arena" },
+      { property: "og:description", content: "Smart Arena payments and check-in dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -213,6 +216,7 @@ function Stats({ rows }: { rows: Registration[] }) {
     return {
       total: rows.length,
       paid: paid.length,
+      collected: paid.reduce((sum, r) => sum + r.amount_ngn, 0),
       paidCash: paid.filter((r) => r.payment_type === "CASH_AT_COURT").length,
       paidTransfer: paid.filter((r) => r.payment_type === "BANK_TRANSFER").length,
       pendingTransfer: rows.filter((r) => r.payment_status === "PENDING_BANK_TRANSFER").length,
@@ -224,7 +228,7 @@ function Stats({ rows }: { rows: Registration[] }) {
 
   const cards = [
     { label: "Registered", value: s.total, sub: `${s.checkedIn} checked in` },
-    { label: "Paid", value: s.paid, sub: `${formatMoney(s.paid * CLUB.price)} collected` },
+    { label: "Paid", value: s.paid, sub: `${formatMoney(s.collected)} collected` },
     { label: "Pending transfer", value: s.pendingTransfer, sub: `${s.unpaid} not yet sent`, tone: "text-pending" },
     { label: "Awaiting cash", value: s.awaitingCash, sub: `${s.paidCash} cash · ${s.paidTransfer} transfer paid`, tone: "text-awaiting" },
   ];
@@ -244,6 +248,7 @@ function Stats({ rows }: { rows: Registration[] }) {
 
 function RegistrationList({ rows, loading }: { rows: Registration[]; loading: boolean }) {
   const [session, setSession] = useState<SessionSlot | "ALL">("ALL");
+  const [membership, setMembership] = useState<MembershipType | "ALL">("ALL");
   const [status, setStatus] = useState<PaymentStatus | "ALL">("ALL");
   const [search, setSearch] = useState("");
 
@@ -252,6 +257,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
     return rows.filter(
       (r) =>
         (session === "ALL" || r.session === session) &&
+        (membership === "ALL" || r.membership === membership) &&
         (status === "ALL" || r.payment_status === status) &&
         (!q ||
           r.full_name.toLowerCase().includes(q) ||
@@ -259,7 +265,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
           r.checkin_code.includes(q) ||
           r.qr_reference.toLowerCase().includes(q)),
     );
-  }, [rows, session, status, search]);
+  }, [rows, session, membership, status, search]);
 
   return (
     <section className="rounded-2xl border bg-card">
@@ -279,6 +285,14 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
           {SESSIONS.map((s) => (
             <Chip key={s.value} active={session === s.value} onClick={() => setSession(s.value)}>
               {sessionLabel(s.value)}
+            </Chip>
+          ))}
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <Chip active={membership === "ALL"} onClick={() => setMembership("ALL")}>All players</Chip>
+          {MEMBERSHIPS.map((m) => (
+            <Chip key={m} active={membership === m} onClick={() => setMembership(m)}>
+              {MEMBERSHIP_LABEL[m]}s
             </Chip>
           ))}
         </div>
@@ -323,14 +337,17 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium">{sessionLabel(r.session)}</p>
-                      <p className="text-xs text-muted-foreground">{formatSessionDate(r.session_date)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatSessionDate(r.session_date)} · {formatPlayTime(r.play_time)}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       <PaymentStatusPill status={r.payment_status} />
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                         {r.payment_type === "BANK_TRANSFER" ? <Building2 className="size-3" /> : <Banknote className="size-3" />}
-                        {PAYMENT_TYPE_LABEL[r.payment_type]}
+                        {PAYMENT_TYPE_LABEL[r.payment_type]} · {formatMoney(r.amount_ngn)}
                       </p>
+                      <p className="text-xs text-muted-foreground">{MEMBERSHIP_LABEL[r.membership]}</p>
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <RecordedBy r={r} />
@@ -360,7 +377,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                   <div>
                     <p className="font-semibold">{r.full_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {r.phone} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)}
+                      {r.phone} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)} {formatPlayTime(r.play_time)}
                     </p>
                   </div>
                   <p className="font-mono font-bold tracking-wider">{r.checkin_code}</p>
@@ -368,7 +385,10 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                 <div className="flex flex-wrap items-center gap-2">
                   <PaymentStatusPill status={r.payment_status} />
                   <CheckinStatusPill status={r.checkin_status} />
-                  <span className="text-xs text-muted-foreground">{PAYMENT_TYPE_LABEL[r.payment_type]}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {PAYMENT_TYPE_LABEL[r.payment_type]} · {formatMoney(r.amount_ngn)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{MEMBERSHIP_LABEL[r.membership]}</span>
                 </div>
                 <div className="text-xs">
                   <RecordedBy r={r} />
