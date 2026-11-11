@@ -15,6 +15,13 @@
       "when": 1794427165037,
       "tag": "0001_registration_membership_play_time",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794428687460,
+      "tag": "0002_all_week_days_and_sport",
+      "breakpoints": true
     }
   ]
 }
