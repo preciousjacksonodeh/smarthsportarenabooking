@@ -20,6 +20,8 @@ import {
   PAYMENT_STATUS_LABEL,
   PAYMENT_TYPE_LABEL,
   SESSIONS,
+  SPORT_LABEL,
+  SPORTS,
   formatDateTime,
   formatMoney,
   formatPlayTime,
@@ -28,6 +30,7 @@ import {
   type MembershipType,
   type PaymentStatus,
   type SessionSlot,
+  type SportType,
 } from "@/lib/club";
 import { cn } from "@/lib/utils";
 
@@ -247,6 +250,7 @@ function Stats({ rows }: { rows: Registration[] }) {
 }
 
 function RegistrationList({ rows, loading }: { rows: Registration[]; loading: boolean }) {
+  const [sport, setSport] = useState<SportType | "ALL">("ALL");
   const [session, setSession] = useState<SessionSlot | "ALL">("ALL");
   const [membership, setMembership] = useState<MembershipType | "ALL">("ALL");
   const [status, setStatus] = useState<PaymentStatus | "ALL">("ALL");
@@ -256,6 +260,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
     const q = search.trim().toLowerCase();
     return rows.filter(
       (r) =>
+        (sport === "ALL" || r.sport === sport) &&
         (session === "ALL" || r.session === session) &&
         (membership === "ALL" || r.membership === membership) &&
         (status === "ALL" || r.payment_status === status) &&
@@ -265,7 +270,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
           r.checkin_code.includes(q) ||
           r.qr_reference.toLowerCase().includes(q)),
     );
-  }, [rows, session, membership, status, search]);
+  }, [rows, sport, session, membership, status, search]);
 
   return (
     <section className="rounded-2xl border bg-card">
@@ -279,6 +284,14 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
             placeholder="Search name, phone, code or reference"
             className="h-10 bg-background pl-9"
           />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <Chip active={sport === "ALL"} onClick={() => setSport("ALL")}>All sports</Chip>
+          {SPORTS.map((sp) => (
+            <Chip key={sp} active={sport === sp} onClick={() => setSport(sp)}>
+              {SPORT_LABEL[sp]}
+            </Chip>
+          ))}
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           <Chip active={session === "ALL"} onClick={() => setSession("ALL")}>All sessions</Chip>
@@ -336,7 +349,9 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                       <p className="text-xs text-muted-foreground">{r.phone}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium">{sessionLabel(r.session)}</p>
+                      <p className="font-medium">
+                        {SPORT_LABEL[r.sport]} · {sessionLabel(r.session)}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {formatSessionDate(r.session_date)} · {formatPlayTime(r.play_time)}
                       </p>
@@ -377,7 +392,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                   <div>
                     <p className="font-semibold">{r.full_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {r.phone} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)} {formatPlayTime(r.play_time)}
+                      {r.phone} · {SPORT_LABEL[r.sport]} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)} {formatPlayTime(r.play_time)}
                     </p>
                   </div>
                   <p className="font-mono font-bold tracking-wider">{r.checkin_code}</p>

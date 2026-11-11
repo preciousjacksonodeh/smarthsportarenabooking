@@ -16,6 +16,7 @@ import {
   CLUB,
   MEMBERSHIP_LABEL,
   PAYMENT_TYPE_LABEL,
+  SPORT_LABEL,
   formatDateTime,
   formatMoney,
   formatPlayTime,
@@ -130,7 +131,9 @@ function TicketPage() {
 
         <article className="overflow-hidden rounded-2xl border bg-card shadow-ticket animate-pop-in">
           <header className="court-surface px-6 pb-6 pt-7">
-            <p className="eyebrow text-accent">{formatSessionDate(t.session_date)}</p>
+            <p className="eyebrow text-accent">
+              {SPORT_LABEL[t.sport]} · {formatSessionDate(t.session_date)}
+            </p>
             <h1 className="font-display mt-2 text-4xl">{sessionLabel(t.session)}</h1>
             <p className="font-display mt-1 text-2xl text-accent">{formatPlayTime(t.play_time)}</p>
             <p className="mt-3 text-lg font-semibold">{t.full_name}</p>
