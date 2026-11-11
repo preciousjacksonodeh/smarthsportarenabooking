@@ -5,10 +5,11 @@ export type PaymentType = Database["public"]["Enums"]["payment_type"];
 export type PaymentStatus = Database["public"]["Enums"]["payment_status"];
 export type CheckinStatus = Database["public"]["Enums"]["checkin_status"];
 export type MembershipType = Database["public"]["Enums"]["membership_type"];
+export type SportType = Database["public"]["Enums"]["sport_type"];
 
 // Court details. Bank details are placeholders — replace with the real ones.
 export const CLUB = {
-  name: "Smart Arena",
+  name: "Smart Sports Arena",
   tagline: "Book your spot on court",
   currency: "NGN",
   openFrom: 7, // first playing hour, 07:00
@@ -16,7 +17,7 @@ export const CLUB = {
   lastStart: 21, // latest playing time a player can pick, 21:00
   bank: {
     bankName: "Your Bank",
-    accountName: "Smart Arena",
+    accountName: "Smart Sports Arena",
     accountNumber: "0123456789",
   },
 };
@@ -39,12 +40,23 @@ export const MEMBERSHIP_HINT: Record<MembershipType, string> = {
 
 export const MEMBERSHIPS: MembershipType[] = ["OLD_TIMER", "NEW_MEMBER"];
 
-export const SESSIONS: { value: SessionSlot; day: string }[] = [
-  { value: "TUESDAY_5PM", day: "Tuesday" },
-  { value: "THURSDAY_5PM", day: "Thursday" },
-  { value: "SATURDAY", day: "Saturday" },
-  { value: "SUNDAY", day: "Sunday" },
+// Every day of the week. Tuesday/Thursday keep their original stored names.
+export const SESSIONS: { value: SessionSlot; day: string; dow: number }[] = [
+  { value: "MONDAY", day: "Monday", dow: 1 },
+  { value: "TUESDAY_5PM", day: "Tuesday", dow: 2 },
+  { value: "WEDNESDAY", day: "Wednesday", dow: 3 },
+  { value: "THURSDAY_5PM", day: "Thursday", dow: 4 },
+  { value: "FRIDAY", day: "Friday", dow: 5 },
+  { value: "SATURDAY", day: "Saturday", dow: 6 },
+  { value: "SUNDAY", day: "Sunday", dow: 0 },
 ];
+
+export const SPORTS: SportType[] = ["BASKETBALL", "FOOTBALL"];
+
+export const SPORT_LABEL: Record<SportType, string> = {
+  BASKETBALL: "Basketball",
+  FOOTBALL: "Football",
+};
 
 export function sessionLabel(slot: SessionSlot) {
   return SESSIONS.find((x) => x.value === slot)?.day ?? slot;

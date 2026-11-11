@@ -38,9 +38,9 @@ export const Route = createFileRoute("/ticket/$ref")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Your court pass — Smart Arena" },
-      { name: "description", content: "Your Smart Arena session pass with QR code, check-in code and payment status." },
-      { property: "og:title", content: "Your court pass — Smart Arena" },
+      { title: "Your court pass — Smart Sports Arena" },
+      { name: "description", content: "Your Smart Sports Arena session pass with QR code, check-in code and payment status." },
+      { property: "og:title", content: "Your court pass — Smart Sports Arena" },
       { property: "og:description", content: "Show this QR pass at the court to check in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
