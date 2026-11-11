@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
 import "@lovable.dev/cloud-auth-js/styles.css";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { meQueryOptions } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -42,6 +44,12 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  const { data: me } = useQuery(meQueryOptions);
+
+  // Already signed in (e.g. returning from Google) → go straight to the dashboard.
+  useEffect(() => {
+    if (me) navigate({ to: "/admin" });
+  }, [me, navigate]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
