@@ -233,11 +233,11 @@ function RegisterPage() {
                     aria-checked={active}
                     onClick={() => setSession(s.value)}
                     className={cn(
-                      "rounded-lg border-2 bg-card px-3 py-3 text-left transition-all",
+                      "min-w-0 rounded-lg border-2 bg-card px-2.5 py-3 text-left transition-all",
                       active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
                     )}
                   >
-                    <span className="font-display block text-base">{s.day}</span>
+                    <span className="font-display block text-sm">{s.day}</span>
                     <span className="mt-0.5 block font-mono text-xs text-muted-foreground">{nextDateLabel(s.value)}</span>
                   </button>
                 );
