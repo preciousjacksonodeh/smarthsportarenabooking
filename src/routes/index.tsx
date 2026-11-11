@@ -200,7 +200,7 @@ function RegisterPage() {
                   >
                     <span className="font-display block text-lg">{s.day}</span>
                     <span className="mt-1 flex items-center justify-between text-sm text-muted-foreground">
-                      <span>Open {OPENING_HOURS}</span>
+                      <span>Next session</span>
                       <span className="font-mono text-xs">{nextDateLabel(s.value)}</span>
                     </span>
                   </button>
