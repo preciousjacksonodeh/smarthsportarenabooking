@@ -266,6 +266,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
         (status === "ALL" || r.payment_status === status) &&
         (!q ||
           r.full_name.toLowerCase().includes(q) ||
+          parseGuests(r.guests).some((g) => g.name.toLowerCase().includes(q)) ||
           r.phone.includes(q) ||
           r.checkin_code.includes(q) ||
           r.qr_reference.toLowerCase().includes(q)),
@@ -347,6 +348,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                     <td className="px-4 py-3">
                       <p className="font-semibold">{r.full_name}</p>
                       <p className="text-xs text-muted-foreground">{r.phone}</p>
+                      <GroupNames r={r} />
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium">
@@ -391,6 +393,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold">{r.full_name}</p>
+                    <GroupNames r={r} />
                     <p className="text-xs text-muted-foreground">
                       {r.phone} · {SPORT_LABEL[r.sport]} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)} {formatPlayTime(r.play_time)}
                     </p>
@@ -521,5 +524,16 @@ function StaffPanel({ myId }: { myId: string }) {
         </ul>
       )}
     </section>
+  );
+}
+
+function GroupNames({ r }: { r: Registration }) {
+  const guests = parseGuests(r.guests);
+  if (guests.length === 0) return null;
+  return (
+    <div className="mt-1.5 rounded-md bg-secondary px-2 py-1.5 text-xs">
+      <p className="font-semibold text-primary">Paying for {guests.length} more</p>
+      <p className="text-muted-foreground">{guests.map((g) => `${g.name} (${MEMBERSHIP_LABEL[g.membership]})`).join(", ")}</p>
+    </div>
   );
 }
