@@ -28,6 +28,7 @@ type CheckInResult =
       session: SessionSlot;
       play_time?: string;
       amount_ngn?: number;
+      party_size?: number;
     };
 
 export function useAdminActions() {
@@ -72,7 +73,7 @@ export function useAdminActions() {
       switch (res.result) {
         case "checked_in":
           toast.success(
-            `${res.full_name} checked in · ${sessionLabel(res.session)} ${formatPlayTime(res.play_time ?? null)}`,
+            `${res.full_name}${res.party_size && res.party_size > 1 ? ` + ${res.party_size - 1} more` : ""} checked in · ${sessionLabel(res.session)} ${formatPlayTime(res.play_time ?? null)}`,
           );
           break;
         case "already":

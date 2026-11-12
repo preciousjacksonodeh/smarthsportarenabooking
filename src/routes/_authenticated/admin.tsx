@@ -219,6 +219,7 @@ function Stats({ rows }: { rows: Registration[] }) {
     const paid = rows.filter((r) => r.payment_status === "PAID");
     return {
       total: rows.length,
+      players: rows.reduce((sum, r) => sum + 1 + parseGuests(r.guests).length, 0),
       paid: paid.length,
       collected: paid.reduce((sum, r) => sum + r.amount_ngn, 0),
       paidCash: paid.filter((r) => r.payment_type === "CASH_AT_COURT").length,
@@ -231,7 +232,7 @@ function Stats({ rows }: { rows: Registration[] }) {
   }, [rows]);
 
   const cards = [
-    { label: "Registered", value: s.total, sub: `${s.checkedIn} checked in` },
+    { label: "Bookings", value: s.total, sub: `${s.players} players · ${s.checkedIn} checked in` },
     { label: "Paid", value: s.paid, sub: `${formatMoney(s.collected)} collected` },
     { label: "Pending transfer", value: s.pendingTransfer, sub: `${s.unpaid} not yet sent`, tone: "text-pending" },
     { label: "Awaiting cash", value: s.awaitingCash, sub: `${s.paidCash} cash · ${s.paidTransfer} transfer paid`, tone: "text-awaiting" },
