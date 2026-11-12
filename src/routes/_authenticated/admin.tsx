@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Building2, Loader2, LogOut, ScanLine, Search, ShieldOff } from "lucide-react";
+import { Banknote, Building2, Loader2, LogOut, QrCode, ScanLine, Search, ShieldOff } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { CheckinStatusPill, PaymentStatusPill } from "@/components/courtside/StatusPill";
@@ -92,6 +92,11 @@ function AdminPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Brand inverted />
           <div className="flex items-center gap-3">
+            <Button asChild size="sm" variant="ghost" className="text-court-foreground hover:bg-court-foreground/10 hover:text-court-foreground">
+              <Link to="/booking-qr">
+                <QrCode /> Booking QR
+              </Link>
+            </Button>
             <span className="hidden text-sm text-court-foreground/80 sm:inline">{me.displayName}</span>
             <Button size="sm" variant="ghost" className="text-court-foreground hover:bg-court-foreground/10 hover:text-court-foreground" onClick={signOut}>
               <LogOut /> Sign out
