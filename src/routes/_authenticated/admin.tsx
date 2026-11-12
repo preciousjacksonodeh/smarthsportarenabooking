@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Building2, Loader2, LogOut, ScanLine, Search, ShieldOff } from "lucide-react";
+import { Banknote, Building2, Loader2, LogOut, QrCode, ScanLine, Search, ShieldOff } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { CheckinStatusPill, PaymentStatusPill } from "@/components/courtside/StatusPill";
@@ -26,6 +26,7 @@ import {
   formatMoney,
   formatPlayTime,
   formatSessionDate,
+  parseGuests,
   sessionLabel,
   type MembershipType,
   type PaymentStatus,
@@ -40,10 +41,10 @@ type Range = "upcoming" | "past" | "all";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — Smart Sports Arena" },
-      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Smart Sports Arena session." },
-      { property: "og:title", content: "Admin dashboard — Smart Sports Arena" },
-      { property: "og:description", content: "Smart Sports Arena payments and check-in dashboard." },
+      { title: "Admin dashboard — Smarth Sport Arena" },
+      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Smarth Sport Arena session." },
+      { property: "og:title", content: "Admin dashboard — Smarth Sport Arena" },
+      { property: "og:description", content: "Smarth Sport Arena payments and check-in dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -91,6 +92,11 @@ function AdminPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Brand inverted />
           <div className="flex items-center gap-3">
+            <Button asChild size="sm" variant="ghost" className="text-court-foreground hover:bg-court-foreground/10 hover:text-court-foreground">
+              <Link to="/booking-qr">
+                <QrCode /> Booking QR
+              </Link>
+            </Button>
             <span className="hidden text-sm text-court-foreground/80 sm:inline">{me.displayName}</span>
             <Button size="sm" variant="ghost" className="text-court-foreground hover:bg-court-foreground/10 hover:text-court-foreground" onClick={signOut}>
               <LogOut /> Sign out
@@ -218,6 +224,7 @@ function Stats({ rows }: { rows: Registration[] }) {
     const paid = rows.filter((r) => r.payment_status === "PAID");
     return {
       total: rows.length,
+      players: rows.reduce((sum, r) => sum + 1 + parseGuests(r.guests).length, 0),
       paid: paid.length,
       collected: paid.reduce((sum, r) => sum + r.amount_ngn, 0),
       paidCash: paid.filter((r) => r.payment_type === "CASH_AT_COURT").length,
@@ -230,7 +237,7 @@ function Stats({ rows }: { rows: Registration[] }) {
   }, [rows]);
 
   const cards = [
-    { label: "Registered", value: s.total, sub: `${s.checkedIn} checked in` },
+    { label: "Bookings", value: s.total, sub: `${s.players} players · ${s.checkedIn} checked in` },
     { label: "Paid", value: s.paid, sub: `${formatMoney(s.collected)} collected` },
     { label: "Pending transfer", value: s.pendingTransfer, sub: `${s.unpaid} not yet sent`, tone: "text-pending" },
     { label: "Awaiting cash", value: s.awaitingCash, sub: `${s.paidCash} cash · ${s.paidTransfer} transfer paid`, tone: "text-awaiting" },
@@ -266,6 +273,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
         (status === "ALL" || r.payment_status === status) &&
         (!q ||
           r.full_name.toLowerCase().includes(q) ||
+          parseGuests(r.guests).some((g) => g.name.toLowerCase().includes(q)) ||
           r.phone.includes(q) ||
           r.checkin_code.includes(q) ||
           r.qr_reference.toLowerCase().includes(q)),
@@ -347,6 +355,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                     <td className="px-4 py-3">
                       <p className="font-semibold">{r.full_name}</p>
                       <p className="text-xs text-muted-foreground">{r.phone}</p>
+                      <GroupNames r={r} />
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium">
@@ -391,6 +400,7 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold">{r.full_name}</p>
+                    <GroupNames r={r} />
                     <p className="text-xs text-muted-foreground">
                       {r.phone} · {SPORT_LABEL[r.sport]} · {sessionLabel(r.session)}, {formatSessionDate(r.session_date)} {formatPlayTime(r.play_time)}
                     </p>
@@ -521,5 +531,16 @@ function StaffPanel({ myId }: { myId: string }) {
         </ul>
       )}
     </section>
+  );
+}
+
+function GroupNames({ r }: { r: Registration }) {
+  const guests = parseGuests(r.guests);
+  if (guests.length === 0) return null;
+  return (
+    <div className="mt-1.5 rounded-md bg-secondary px-2 py-1.5 text-xs">
+      <p className="font-semibold text-primary">Paying for {guests.length} more</p>
+      <p className="text-muted-foreground">{guests.map((g) => `${g.name} (${MEMBERSHIP_LABEL[g.membership]})`).join(", ")}</p>
+    </div>
   );
 }

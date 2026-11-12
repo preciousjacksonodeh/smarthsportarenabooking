@@ -9,7 +9,8 @@ export type SportType = Database["public"]["Enums"]["sport_type"];
 
 // Court details. Bank details are placeholders — replace with the real ones.
 export const CLUB = {
-  name: "Smart Sports Arena",
+  name: "Smarth Sport Arena",
+  bookingTitle: "Smarth Sport Arena Booking",
   tagline: "Book your spot on court",
   currency: "NGN",
   openFrom: 7, // first playing hour, 07:00
@@ -17,7 +18,7 @@ export const CLUB = {
   lastStart: 21, // latest playing time a player can pick, 21:00
   bank: {
     bankName: "Your Bank",
-    accountName: "Smart Sports Arena",
+    accountName: "Smarth Sport Arena",
     accountNumber: "0123456789",
   },
 };
@@ -39,6 +40,22 @@ export const MEMBERSHIP_HINT: Record<MembershipType, string> = {
 };
 
 export const MEMBERSHIPS: MembershipType[] = ["OLD_TIMER", "NEW_MEMBER"];
+
+// Group bookings: one payer can add up to this many extra players.
+export const MAX_GUESTS = 9;
+
+export type Guest = { name: string; membership: MembershipType };
+
+// Reads the stored list of extra players, ignoring anything malformed.
+export function parseGuests(value: unknown): Guest[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((g) => {
+    if (!g || typeof g !== "object") return [];
+    const { name, membership } = g as Record<string, unknown>;
+    if (typeof name !== "string" || (membership !== "OLD_TIMER" && membership !== "NEW_MEMBER")) return [];
+    return [{ name, membership }];
+  });
+}
 
 // Every day of the week. Tuesday/Thursday keep their original stored names.
 export const SESSIONS: { value: SessionSlot; day: string; dow: number }[] = [

@@ -21,6 +21,7 @@ import {
   formatMoney,
   formatPlayTime,
   formatSessionDate,
+  parseGuests,
   sessionLabel,
   type PaymentType,
 } from "@/lib/club";
@@ -39,9 +40,9 @@ export const Route = createFileRoute("/ticket/$ref")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Your court pass — Smart Sports Arena" },
-      { name: "description", content: "Your Smart Sports Arena session pass with QR code, check-in code and payment status." },
-      { property: "og:title", content: "Your court pass — Smart Sports Arena" },
+      { title: "Your court pass — Smarth Sport Arena" },
+      { name: "description", content: "Your Smarth Sport Arena session pass with QR code, check-in code and payment status." },
+      { property: "og:title", content: "Your court pass — Smarth Sport Arena" },
       { property: "og:description", content: "Show this QR pass at the court to check in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -119,6 +120,7 @@ function TicketPage() {
   if (!t) return null;
   const ticketUrl = typeof window !== "undefined" ? `${window.location.origin}/ticket/${t.qr_reference}` : t.qr_reference;
   const paid = t.payment_status === "PAID";
+  const guests = parseGuests(t.guests);
   const otherType: PaymentType = t.payment_type === "BANK_TRANSFER" ? "CASH_AT_COURT" : "BANK_TRANSFER";
 
   return (
@@ -138,13 +140,26 @@ function TicketPage() {
             <p className="font-display mt-1 text-2xl text-accent">{formatPlayTime(t.play_time)}</p>
             <p className="mt-3 text-lg font-semibold">{t.full_name}</p>
             <p className="text-sm text-court-foreground/70">{t.phone}</p>
+            {guests.length > 0 && (
+              <div className="mt-4 border-t border-court-foreground/25 pt-3">
+                <p className="eyebrow text-accent">Group of {guests.length + 1} · paid by {t.full_name.split(" ")[0]}</p>
+                <ol className="mt-2 space-y-1 text-sm">
+                  {guests.map((g, i) => (
+                    <li key={i} className="flex justify-between gap-3">
+                      <span className="font-semibold">{g.name}</span>
+                      <span className="text-court-foreground/70">{MEMBERSHIP_LABEL[g.membership]}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </header>
 
           <div className="flex flex-wrap items-center gap-2 px-6 pt-5">
             <PaymentStatusPill status={t.payment_status} />
             <CheckinStatusPill status={t.checkin_status} />
             <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
-              {MEMBERSHIP_LABEL[t.membership]} · {formatMoney(t.amount_ngn)}
+              {guests.length > 0 ? `${guests.length + 1} players` : MEMBERSHIP_LABEL[t.membership]} · {formatMoney(t.amount_ngn)}
             </span>
             <span className="ml-auto text-xs text-muted-foreground">{PAYMENT_TYPE_LABEL[t.payment_type]}</span>
           </div>
@@ -167,7 +182,7 @@ function TicketPage() {
               </StateNote>
             ) : paid ? (
               <StateNote icon={<ShieldCheck className="text-paid" />} title="Paid — you're all set">
-                Show this QR code or your 6-digit code at the court to check in.
+                Show this QR code or your 6-digit code at the court to check in{guests.length > 0 ? " — it admits your whole group" : ""}.
               </StateNote>
             ) : t.payment_status === "AWAITING_CASH" ? (
               <StateNote icon={<Banknote className="text-awaiting" />} title={`Bring ${formatMoney(t.amount_ngn)} cash`}>
@@ -255,6 +270,7 @@ function AdminTicketPanel({ qrRef }: { qrRef: string }) {
         {a.checkIn && (
           <Button variant="court" size="lg" disabled={busy} onClick={() => checkIn.mutate(row.qr_reference)}>
             Check in {row.full_name.split(" ")[0]}
+            {parseGuests(row.guests).length > 0 ? ` + ${parseGuests(row.guests).length}` : ""}
           </Button>
         )}
         {a.confirmTransfer && (

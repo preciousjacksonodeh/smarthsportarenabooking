@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, ShieldCheck, Trophy, Users } from "lucide-react";
+import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, ShieldCheck, Trophy, UserPlus, Users, X } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   CLUB,
   MEMBERSHIP_HINT,
   MEMBERSHIP_LABEL,
+  MAX_GUESTS,
   MEMBERSHIPS,
   OPENING_HOURS,
   PLAY_TIMES,
@@ -21,6 +22,7 @@ import {
   SPORT_LABEL,
   SPORTS,
   hourLabel,
+  type Guest,
   type MembershipType,
   type PaymentType,
   type SessionSlot,
@@ -31,13 +33,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Register for a court session — Smart Sports Arena" },
+      { title: "Register for a court session — Smarth Sport Arena" },
       {
         name: "description",
         content:
-          "Smart Sports Arena is open 7:00 AM to 10:00 PM. Pick basketball or football, your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass.",
+          "Smarth Sport Arena is open 7:00 AM to 10:00 PM. Pick basketball or football, your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass.",
       },
-      { property: "og:title", content: "Register for a court session — Smart Sports Arena" },
+      { property: "og:title", content: "Register for a court session — Smarth Sport Arena" },
       {
         property: "og:description",
         content: "Pick your day and playing time, pay by transfer or cash, and get your QR check-in pass in seconds.",
@@ -68,7 +70,12 @@ function RegisterPage() {
   const [playTime, setPlayTime] = useState<string | null>(null);
   const [membership, setMembership] = useState<MembershipType | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
+  const [guests, setGuests] = useState<{ name: string; membership: MembershipType | null }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  function updateGuest(i: number, patch: Partial<{ name: string; membership: MembershipType | null }>) {
+    setGuests((gs) => gs.map((g, j) => (j === i ? { ...g, ...patch } : g)));
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,6 +95,16 @@ function RegisterPage() {
       toast.error("Tell us if you're an old timer or a new member.");
       return;
     }
+    for (const [i, g] of guests.entries()) {
+      if (g.name.trim().length < 2) {
+        toast.error(`Enter the full name of player ${i + 2}.`);
+        return;
+      }
+      if (!g.membership) {
+        toast.error(`Is ${g.name.trim()} an old timer or a new member?`);
+        return;
+      }
+    }
     if (!paymentType) {
       toast.error("Choose how you'll pay.");
       return;
@@ -101,6 +118,7 @@ function RegisterPage() {
       _membership: membership,
       _play_time: playTime,
       _sport: sport,
+      _guests: guests.map((g): Guest => ({ name: g.name.trim(), membership: g.membership as MembershipType })),
     });
     setSubmitting(false);
     if (error || !data) {
@@ -314,6 +332,74 @@ function RegisterPage() {
           </fieldset>
 
           <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold">Paying for other players too?</legend>
+            <p className="text-sm text-muted-foreground">
+              Add each friend's name. You pay once and one pass checks the whole group in.
+            </p>
+            {guests.length > 0 && (
+              <ol className="space-y-3">
+                {guests.map((g, i) => (
+                  <li key={i} className="space-y-2 rounded-lg border-2 border-border bg-card p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">#{i + 2}</span>
+                      <Input
+                        aria-label={`Player ${i + 2} full name`}
+                        required
+                        value={g.name}
+                        onChange={(e) => updateGuest(i, { name: e.target.value })}
+                        placeholder="Player's full name"
+                        className="h-11 bg-background text-base"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Remove player ${i + 2}`}
+                        onClick={() => setGuests((gs) => gs.filter((_, j) => j !== i))}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                    <div role="radiogroup" aria-label={`Player ${i + 2} membership`} className="grid grid-cols-2 gap-2">
+                      {MEMBERSHIPS.map((m) => {
+                        const active = g.membership === m;
+                        return (
+                          <button
+                            key={m}
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            onClick={() => updateGuest(i, { membership: m })}
+                            className={cn(
+                              "rounded-md border-2 px-2 py-2 text-sm font-medium transition-all",
+                              active
+                                ? "border-primary bg-secondary text-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/40",
+                            )}
+                          >
+                            {MEMBERSHIP_LABEL[m]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {guests.length < MAX_GUESTS && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setGuests((gs) => [...gs, { name: "", membership: null }])}
+              >
+                <UserPlus />
+                Add a player
+              </Button>
+            )}
+          </fieldset>
+
+          <fieldset className="space-y-3">
             <legend className="text-sm font-semibold">How will you pay?</legend>
             <div role="radiogroup" aria-label="Payment type" className="grid gap-3 sm:grid-cols-2">
               {(
@@ -348,7 +434,7 @@ function RegisterPage() {
 
           <Button type="submit" variant="hero" size="xl" className="w-full" disabled={submitting}>
             {submitting ? <Loader2 className="animate-spin" /> : null}
-            Get my pass
+            {guests.length > 0 ? `Get our pass (${guests.length + 1} players)` : "Get my pass"}
             <ArrowRight />
           </Button>
 
