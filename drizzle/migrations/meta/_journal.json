@@ -22,6 +22,13 @@
       "when": 1794428687460,
       "tag": "0002_all_week_days_and_sport",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794474058090,
+      "tag": "0003_group_booking_guests",
+      "breakpoints": true
     }
   ]
 }

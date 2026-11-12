@@ -46,6 +46,7 @@ export type Database = {
           checkin_status: Database["public"]["Enums"]["checkin_status"]
           created_at: string
           full_name: string
+          guests: Json
           id: string
           membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string | null
@@ -72,6 +73,7 @@ export type Database = {
           checkin_status?: Database["public"]["Enums"]["checkin_status"]
           created_at?: string
           full_name: string
+          guests?: Json
           id?: string
           membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           checkin_status?: Database["public"]["Enums"]["checkin_status"]
           created_at?: string
           full_name?: string
+          guests?: Json
           id?: string
           membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
@@ -162,6 +165,7 @@ export type Database = {
           checkin_status: Database["public"]["Enums"]["checkin_status"]
           created_at: string
           full_name: string
+          guests: Json
           membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string
           payment_status: Database["public"]["Enums"]["payment_status"]
@@ -189,6 +193,7 @@ export type Database = {
       register_player: {
         Args: {
           _full_name: string
+          _guests?: Json
           _membership: Database["public"]["Enums"]["membership_type"]
           _payment_type: Database["public"]["Enums"]["payment_type"]
           _phone: string
