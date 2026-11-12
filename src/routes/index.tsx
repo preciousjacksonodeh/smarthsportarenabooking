@@ -129,7 +129,7 @@ function RegisterPage() {
             spot on <span className="text-accent">court.</span>
           </h1>
           <p className="mt-6 max-w-sm text-lg text-court-foreground/80">
-            Choose basketball or football, your day and playing time, pay by transfer or cash, and show your QR pass at the gate.
+            Show your QR pass at the gate.
           </p>
           <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-court-foreground">
             {SPORTS.map((sp) => (
