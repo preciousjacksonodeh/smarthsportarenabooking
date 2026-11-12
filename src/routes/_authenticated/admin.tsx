@@ -26,6 +26,7 @@ import {
   formatMoney,
   formatPlayTime,
   formatSessionDate,
+  parseGuests,
   sessionLabel,
   type MembershipType,
   type PaymentStatus,
