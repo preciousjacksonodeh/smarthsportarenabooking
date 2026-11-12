@@ -31,13 +31,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Register for a court session — Smart Sports Arena" },
+      { title: "Register for a court session — Smarth Sport Arena" },
       {
         name: "description",
         content:
-          "Smart Sports Arena is open 7:00 AM to 10:00 PM. Pick basketball or football, your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass.",
+          "Smarth Sport Arena is open 7:00 AM to 10:00 PM. Pick basketball or football, your day and playing time, choose bank transfer or cash at court, and get your QR check-in pass.",
       },
-      { property: "og:title", content: "Register for a court session — Smart Sports Arena" },
+      { property: "og:title", content: "Register for a court session — Smarth Sport Arena" },
       {
         property: "og:description",
         content: "Pick your day and playing time, pay by transfer or cash, and get your QR check-in pass in seconds.",

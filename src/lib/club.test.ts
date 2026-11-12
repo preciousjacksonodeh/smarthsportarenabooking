@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ACADEMY, ACADEMY_HOURS, CLUB, MEMBERSHIP_PRICES, OPENING_HOURS, PLAY_TIMES, SESSIONS, SPORT_LABEL, SPORTS, formatPlayTime } from "./club";
 
-describe("Smart Sports Arena pricing and playing hours", () => {
+describe("Smarth Sport Arena pricing and playing hours", () => {
   it("charges old timers ₦1,000 and new members ₦2,000 per session", () => {
     expect(MEMBERSHIP_PRICES.OLD_TIMER).toBe(1000);
     expect(MEMBERSHIP_PRICES.NEW_MEMBER).toBe(2000);
@@ -14,7 +14,7 @@ describe("Smart Sports Arena pricing and playing hours", () => {
   });
 
   it("shows the court as open 7:00 AM to 10:00 PM", () => {
-    expect(CLUB.name).toBe("Smart Sports Arena");
+    expect(CLUB.name).toBe("Smarth Sport Arena");
     expect(OPENING_HOURS).toBe("7:00 AM – 10:00 PM");
   });
 

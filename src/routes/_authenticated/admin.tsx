@@ -40,10 +40,10 @@ type Range = "upcoming" | "past" | "all";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — Smart Sports Arena" },
-      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Smart Sports Arena session." },
-      { property: "og:title", content: "Admin dashboard — Smart Sports Arena" },
-      { property: "og:description", content: "Smart Sports Arena payments and check-in dashboard." },
+      { title: "Admin dashboard — Smarth Sport Arena" },
+      { name: "description", content: "Confirm transfers, record cash payments and check players in for every Smarth Sport Arena session." },
+      { property: "og:title", content: "Admin dashboard — Smarth Sport Arena" },
+      { property: "og:description", content: "Smarth Sport Arena payments and check-in dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
