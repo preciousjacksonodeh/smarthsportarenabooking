@@ -35,3 +35,4 @@ use the editor.
 - Club name, price and bank details live in `src/lib/club.ts`; UI never hardcodes them.
 - The amount charged is computed server-side in `register_player` from the declared membership, and stored on the row; the browser sends membership and playing time, never a price.
 - Admin button availability is decided by `availableActions` in `src/lib/admin-actions.ts` (tested), mirroring the RPC checks.
+- Group bookings are one `registrations` row: extra players live in its `guests` jsonb ([{name, membership}]), `register_player` validates them and adds their prices to `amount_ngn`, and one pass/check-in admits the whole group — keeps one payment per row.
