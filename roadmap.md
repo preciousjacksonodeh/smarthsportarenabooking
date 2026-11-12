@@ -6,7 +6,7 @@
 - [x] Academy training Fri, Sat, Sun 4 PM – 6 PM shown as info
 - [x] Add uploaded logo next to the club name
 - [x] Replace intro text with "Show your QR pass at the gate"
-- [ ] Group booking: one payer pays for 2+ players, every player's name required
-- [ ] Rename club to the spelling the user confirms (Smarth ...)
-- [ ] QR poster "Smarth Sports Arena booking" that opens the booking site
-- [ ] Connect ChatGPT, Visily, Mermaid Chart, GitHub, n8n, Airtable (purpose to confirm)
+- [x] Group booking: one payer pays for 2+ players, every player's name required
+- [x] Rename club to Smarth Sport Arena
+- [x] QR poster "Smarth Sports Arena booking" that opens the booking site
+- [ ] Connect Visily, Mermaid Chart, GitHub, n8n, Airtable for chat use — waiting on user (n8n card skipped)
