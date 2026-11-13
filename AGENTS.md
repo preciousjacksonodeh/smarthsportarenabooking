@@ -33,6 +33,6 @@ use the editor.
 - All player registrations and payments (transfer and cash) live in the single `public.registrations` table; writes go only through SECURITY DEFINER RPCs (register_player, report_transfer_sent, change_payment_type, admin_*) so status transitions and "recorded by" names are enforced server-side, never by direct table updates from the browser.
 - Admin rights come from `public.user_roles` (`has_role`); the first account ever created becomes admin, later admins are granted from the dashboard Staff tab.
 - Club name, price and bank details live in `src/lib/club.ts`; UI never hardcodes them.
-- The amount charged is computed server-side in `register_player` from the declared membership, and stored on the row; the browser sends membership and playing time, never a price.
+- The amount charged is computed server-side in `register_player` (sport, membership, guests, optional `hire_hours` flat pitch hire) and stored on the row; the browser never sends a price. `bookingTotal` in `src/lib/club.ts` mirrors it and is tested.
 - Admin button availability is decided by `availableActions` in `src/lib/admin-actions.ts` (tested), mirroring the RPC checks.
 - Group bookings are one `registrations` row: extra players live in its `guests` jsonb ([{name, membership}]), `register_player` validates them and adds their prices to `amount_ngn`, and one pass/check-in admits the whole group — keeps one payment per row.

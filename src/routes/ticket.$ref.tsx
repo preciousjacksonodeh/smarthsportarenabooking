@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery }
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Building2, Check, CheckCircle2, Clock, Copy, Loader2, ShieldCheck } from "lucide-react";
+import { Banknote, Building2, Check, CheckCircle2, Clock, Copy, Loader2, MessageCircle, Phone, ReceiptText, ShieldCheck } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { CheckinStatusPill, PaymentStatusPill } from "@/components/courtside/StatusPill";
@@ -21,7 +21,9 @@ import {
   formatMoney,
   formatPlayTime,
   formatSessionDate,
+  hireLabel,
   parseGuests,
+  whatsappLink,
   sessionLabel,
   type PaymentType,
 } from "@/lib/club";
@@ -159,7 +161,12 @@ function TicketPage() {
             <PaymentStatusPill status={t.payment_status} />
             <CheckinStatusPill status={t.checkin_status} />
             <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
-              {guests.length > 0 ? `${guests.length + 1} players` : MEMBERSHIP_LABEL[t.membership]} · {formatMoney(t.amount_ngn)}
+              {t.hire_hours
+                ? hireLabel(t.hire_hours)
+                : guests.length > 0
+                  ? `${guests.length + 1} players`
+                  : MEMBERSHIP_LABEL[t.membership]}{" "}
+              · {formatMoney(t.amount_ngn)}
             </span>
             <span className="ml-auto text-xs text-muted-foreground">{PAYMENT_TYPE_LABEL[t.payment_type]}</span>
           </div>
@@ -216,6 +223,30 @@ function TicketPage() {
               </>
             )}
 
+            {paid && (
+              <Button asChild variant="outline" size="lg" className="w-full">
+                <Link to="/receipt/$ref" params={{ ref: t.qr_reference }}>
+                  <ReceiptText />
+                  View payment receipt
+                </Link>
+              </Button>
+            )}
+
+            {t.payment_type === "BANK_TRANSFER" && !paid && (
+              <Button asChild variant="outline" className="w-full">
+                <a
+                  href={whatsappLink(
+                    `Hello ${CLUB.name}, here is my transfer receipt for booking ${t.qr_reference} (${t.full_name}, ${formatMoney(t.amount_ngn)}).`,
+                  )}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageCircle />
+                  Send your transfer receipt on WhatsApp
+                </a>
+              </Button>
+            )}
+
             {!paid && (
               <button
                 type="button"
@@ -230,6 +261,13 @@ function TicketPage() {
         </article>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">Bookmark this page — it's your pass.</p>
+        <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground">
+          <Phone className="size-3.5" />
+          For more inquiries, contact
+          <a href={`tel:${CLUB.contactPhone}`} className="font-semibold text-foreground hover:text-primary">
+            {CLUB.contactPhone}
+          </a>
+        </p>
 
         {me?.isAdmin && <AdminTicketPanel qrRef={t.qr_reference} />}
       </div>

@@ -17,6 +17,7 @@ import { meQueryOptions } from "@/lib/auth";
 import {
   MEMBERSHIP_LABEL,
   MEMBERSHIPS,
+  hireLabel,
   PAYMENT_STATUS_LABEL,
   PAYMENT_TYPE_LABEL,
   SESSIONS,
@@ -371,7 +372,10 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                         {r.payment_type === "BANK_TRANSFER" ? <Building2 className="size-3" /> : <Banknote className="size-3" />}
                         {PAYMENT_TYPE_LABEL[r.payment_type]} · {formatMoney(r.amount_ngn)}
                       </p>
-                      <p className="text-xs text-muted-foreground">{MEMBERSHIP_LABEL[r.membership]}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {r.hire_hours ? hireLabel(r.hire_hours) : MEMBERSHIP_LABEL[r.membership]}
+                      </p>
+                      <ReceiptLink r={r} />
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <RecordedBy r={r} />
@@ -413,7 +417,10 @@ function RegistrationList({ rows, loading }: { rows: Registration[]; loading: bo
                   <span className="text-xs text-muted-foreground">
                     {PAYMENT_TYPE_LABEL[r.payment_type]} · {formatMoney(r.amount_ngn)}
                   </span>
-                  <span className="text-xs text-muted-foreground">{MEMBERSHIP_LABEL[r.membership]}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {r.hire_hours ? hireLabel(r.hire_hours) : MEMBERSHIP_LABEL[r.membership]}
+                  </span>
+                  <ReceiptLink r={r} />
                 </div>
                 <div className="text-xs">
                   <RecordedBy r={r} />
@@ -542,5 +549,18 @@ function GroupNames({ r }: { r: Registration }) {
       <p className="font-semibold text-primary">Paying for {guests.length} more</p>
       <p className="text-muted-foreground">{guests.map((g) => `${g.name} (${MEMBERSHIP_LABEL[g.membership]})`).join(", ")}</p>
     </div>
+  );
+}
+
+function ReceiptLink({ r }: { r: { payment_status: string; qr_reference: string } }) {
+  if (r.payment_status !== "PAID") return null;
+  return (
+    <Link
+      to="/receipt/$ref"
+      params={{ ref: r.qr_reference }}
+      className="text-xs font-semibold text-primary hover:underline"
+    >
+      Receipt →
+    </Link>
   );
 }

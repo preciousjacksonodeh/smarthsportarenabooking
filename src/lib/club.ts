@@ -7,7 +7,7 @@ export type CheckinStatus = Database["public"]["Enums"]["checkin_status"];
 export type MembershipType = Database["public"]["Enums"]["membership_type"];
 export type SportType = Database["public"]["Enums"]["sport_type"];
 
-// Court details. Bank details are placeholders — replace with the real ones.
+// Court details.
 export const CLUB = {
   name: "Smarth Sport Arena",
   bookingTitle: "Smarth Sport Arena Booking",
@@ -17,17 +17,56 @@ export const CLUB = {
   openTo: 22, // court closes, 22:00
   lastStart: 21, // latest playing time a player can pick, 21:00
   bank: {
-    bankName: "Your Bank",
+    bankName: "TAJ Bank",
     accountName: "Smarth Sport Arena",
-    accountNumber: "0123456789",
+    accountNumber: "0010761765",
   },
+  contactPhone: "09072163509",
 };
+
+// Opens a WhatsApp chat with the arena's contact number.
+export function whatsappLink(text?: string) {
+  const intl = `234${CLUB.contactPhone.replace(/^0/, "")}`;
+  return `https://wa.me/${intl}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+}
 
 // Price per session by membership. The server charges the same way.
 export const MEMBERSHIP_PRICES: Record<MembershipType, number> = {
   OLD_TIMER: 1000,
   NEW_MEMBER: 2000,
 };
+
+// Football: old timers and new members both pay this per session.
+export const FOOTBALL_PRICE = 2000;
+
+// Hiring the whole football pitch: flat price by hours, whatever the group size.
+export type HireHours = 1 | 2;
+export const HIRE_PRICES: Record<HireHours, number> = { 1: 20000, 2: 35000 };
+export const HIRE_OPTIONS: HireHours[] = [1, 2];
+// A 2-hour hire must finish by closing time.
+export function hireFits(hours: HireHours, playTime: string) {
+  return Number(playTime.slice(0, 2)) + hours <= CLUB.openTo;
+}
+
+// Price for one player per session — mirrors register_player on the server.
+export function playerPrice(sport: SportType, membership: MembershipType) {
+  return sport === "FOOTBALL" ? FOOTBALL_PRICE : MEMBERSHIP_PRICES[membership];
+}
+
+// Total owed for a booking — mirrors register_player on the server.
+export function bookingTotal(b: {
+  sport: SportType;
+  membership: MembershipType;
+  guests: { membership: MembershipType }[];
+  hireHours: HireHours | null;
+}) {
+  if (b.hireHours) return HIRE_PRICES[b.hireHours];
+  return [b.membership, ...b.guests.map((g) => g.membership)].reduce((sum, m) => sum + playerPrice(b.sport, m), 0);
+}
+
+export function hireLabel(hours: number) {
+  return `Pitch hire · ${hours} hour${hours === 1 ? "" : "s"}`;
+}
 
 export const MEMBERSHIP_LABEL: Record<MembershipType, string> = {
   OLD_TIMER: "Old timer",
