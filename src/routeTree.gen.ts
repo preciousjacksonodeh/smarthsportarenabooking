@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookingQrRouteImport } from './routes/booking-qr'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ReceiptRefRouteImport } from './routes/receipt.$ref'
 import { Route as TicketRefRouteImport } from './routes/ticket.$ref'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +41,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ReceiptRefRoute = ReceiptRefRouteImport.update({
+  id: '/receipt/$ref',
+  path: '/receipt/$ref',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketRefRoute = TicketRefRouteImport.update({
   id: '/ticket/$ref',
   path: '/ticket/$ref',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +65,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,16 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/booking-qr' | '/admin' | '/ticket/$ref'
+  fullPaths:
+    '/' | '/auth' | '/booking-qr' | '/admin' | '/receipt/$ref' | '/ticket/$ref'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/booking-qr' | '/admin' | '/ticket/$ref'
+  to:
+    '/' | '/auth' | '/booking-qr' | '/admin' | '/receipt/$ref' | '/ticket/$ref'
   id:
     | '__root__'
     | '/'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/booking-qr'
     | '/_authenticated/admin'
+    | '/receipt/$ref'
     | '/ticket/$ref'
   fileRoutesById: FileRoutesById
 }
@@ -89,6 +101,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BookingQrRoute: typeof BookingQrRoute
+  ReceiptRefRoute: typeof ReceiptRefRoute
   TicketRefRoute: typeof TicketRefRoute
 }
 
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/receipt/$ref': {
+      id: '/receipt/$ref'
+      path: '/receipt/$ref'
+      fullPath: '/receipt/$ref'
+      preLoaderRoute: typeof ReceiptRefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ticket/$ref': {
       id: '/ticket/$ref'
       path: '/ticket/$ref'
@@ -155,6 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BookingQrRoute: BookingQrRoute,
+  ReceiptRefRoute: ReceiptRefRoute,
   TicketRefRoute: TicketRefRoute,
 }
 export const routeTree = rootRouteImport
