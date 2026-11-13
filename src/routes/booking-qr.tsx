@@ -84,6 +84,9 @@ function BookingQrPage() {
           <span>Monday – Sunday</span>
           <span>{OPENING_HOURS}</span>
         </p>
+        <p className="mt-3 text-sm text-court-foreground/80">
+          For more inquiries, contact <span className="font-semibold text-court-foreground">{CLUB.contactPhone}</span>
+        </p>
       </article>
     </div>
   );
