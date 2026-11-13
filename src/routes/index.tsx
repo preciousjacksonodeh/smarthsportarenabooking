@@ -129,7 +129,7 @@ function RegisterPage() {
       _play_time: playTime,
       _sport: sport,
       _guests: guests.map((g): Guest => ({ name: g.name.trim(), membership: g.membership as MembershipType })),
-      _hire_hours: sport === "FOOTBALL" && hireHours ? hireHours : undefined,
+      ...(sport === "FOOTBALL" && hireHours ? { _hire_hours: hireHours } : {}),
     });
     setSubmitting(false);
     if (error || !data) {
