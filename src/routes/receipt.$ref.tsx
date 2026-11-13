@@ -16,7 +16,6 @@ import {
   formatSessionDate,
   hireLabel,
   parseGuests,
-  sessionLabel,
   whatsappLink,
 } from "@/lib/club";
 
@@ -138,7 +137,7 @@ function ReceiptPage() {
           <Row label="Sport" value={SPORT_LABEL[t.sport]} />
           <Row
             label="Session"
-            value={`${sessionLabel(t.session)} ${formatSessionDate(t.session_date)}, ${formatPlayTime(t.play_time)}`}
+            value={`${formatSessionDate(t.session_date)}, ${formatPlayTime(t.play_time)}`}
           />
           <Row
             label="Booking"
