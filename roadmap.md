@@ -10,3 +10,6 @@
 - [x] Rename club to Smarth Sport Arena
 - [x] QR poster "Smarth Sports Arena booking" that opens the booking site
 - [ ] Connect Visily, Mermaid Chart, GitHub, n8n, Airtable for chat use — waiting on user (n8n card skipped)
+- [x] Bank account 0010761765 + inquiry number 09072163509
+- [x] Payment receipts
+- [x] Football ₦2,000 for everyone; pitch hire 1h ₦20,000 / 2h ₦35,000
