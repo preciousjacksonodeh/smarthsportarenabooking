@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, ShieldCheck, Trophy, UserPlus, Users, X } from "lucide-react";
+import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, Phone, ShieldCheck, Trophy, UserPlus, Users, X } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
   ACADEMY,
   ACADEMY_HOURS,
   CLUB,
+  HIRE_OPTIONS,
+  HIRE_PRICES,
   MEMBERSHIP_HINT,
   MEMBERSHIP_LABEL,
   MAX_GUESTS,
@@ -21,7 +23,10 @@ import {
   SESSIONS,
   SPORT_LABEL,
   SPORTS,
+  formatMoney,
+  hireFits,
   hourLabel,
+  type HireHours,
   type Guest,
   type MembershipType,
   type PaymentType,
@@ -70,6 +75,7 @@ function RegisterPage() {
   const [playTime, setPlayTime] = useState<string | null>(null);
   const [membership, setMembership] = useState<MembershipType | null>(null);
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
+  const [hireHours, setHireHours] = useState<HireHours | null>(null);
   const [guests, setGuests] = useState<{ name: string; membership: MembershipType | null }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -89,6 +95,10 @@ function RegisterPage() {
     }
     if (!playTime) {
       toast.error("Pick your playing time.");
+      return;
+    }
+    if (hireHours && !hireFits(hireHours, playTime)) {
+      toast.error(`A ${hireHours}-hour hire must finish by ${hourLabel(CLUB.openTo)}. Pick an earlier time.`);
       return;
     }
     if (!membership) {
@@ -119,6 +129,7 @@ function RegisterPage() {
       _play_time: playTime,
       _sport: sport,
       _guests: guests.map((g): Guest => ({ name: g.name.trim(), membership: g.membership as MembershipType })),
+      _hire_hours: sport === "FOOTBALL" && hireHours ? hireHours : undefined,
     });
     setSubmitting(false);
     if (error || !data) {
@@ -148,6 +159,12 @@ function RegisterPage() {
           </h1>
           <p className="mt-6 max-w-sm text-lg text-court-foreground/80">
             Show your QR pass at the gate.
+          </p>
+          <p className="mt-2 text-sm text-court-foreground/80">
+            Inquiries:{" "}
+            <a href={`tel:${CLUB.contactPhone}`} className="font-semibold text-court-foreground hover:text-accent">
+              {CLUB.contactPhone}
+            </a>
           </p>
           <p className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-court-foreground">
             {SPORTS.map((sp) => (
@@ -224,7 +241,10 @@ function RegisterPage() {
                     type="button"
                     role="radio"
                     aria-checked={active}
-                    onClick={() => setSport(sp)}
+                    onClick={() => {
+                      setSport(sp);
+                      if (sp !== "FOOTBALL") setHireHours(null);
+                    }}
                     className={cn(
                       "flex items-center gap-3 rounded-lg border-2 bg-card p-4 text-left transition-all",
                       active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
@@ -237,6 +257,40 @@ function RegisterPage() {
               })}
             </div>
           </fieldset>
+
+          {sport === "FOOTBALL" && (
+            <fieldset className="space-y-3">
+              <legend className="text-sm font-semibold">Booking type</legend>
+              <div role="radiogroup" aria-label="Booking type" className="grid gap-3 sm:grid-cols-3">
+                {([null, ...HIRE_OPTIONS] as (HireHours | null)[]).map((h) => {
+                  const active = hireHours === h;
+                  return (
+                    <button
+                      key={h ?? "player"}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setHireHours(h)}
+                      className={cn(
+                        "rounded-lg border-2 bg-card p-3 text-left transition-all",
+                        active ? "border-primary bg-secondary shadow-ticket" : "border-border hover:border-primary/40",
+                      )}
+                    >
+                      <span className="block font-semibold">{h ? `Hire pitch · ${h} hour${h === 1 ? "" : "s"}` : "Pay per player"}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {h ? `${formatMoney(HIRE_PRICES[h])} flat` : "Join a session"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {hireHours && (
+                <p className="text-xs text-muted-foreground">
+                  The whole pitch is yours for {hireHours} hour{hireHours === 1 ? "" : "s"}. List your players below if you like — the price stays the same.
+                </p>
+              )}
+            </fieldset>
+          )}
 
           <fieldset className="space-y-3">
             <legend className="text-sm font-semibold">Which day?</legend>
@@ -278,15 +332,17 @@ function RegisterPage() {
             >
               {PLAY_TIMES.map((t) => {
                 const active = playTime === t.value;
+                const blocked = hireHours !== null && !hireFits(hireHours, t.value);
                 return (
                   <button
                     key={t.value}
                     type="button"
                     role="radio"
                     aria-checked={active}
+                    disabled={blocked}
                     onClick={() => setPlayTime(t.value)}
                     className={cn(
-                      "rounded-lg border-2 px-1 py-2.5 text-center text-sm font-medium transition-all",
+                      "rounded-lg border-2 px-1 py-2.5 text-center text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40",
                       active
                         ? "border-primary bg-secondary text-foreground shadow-ticket"
                         : "border-border bg-card text-muted-foreground hover:border-primary/40",
@@ -332,7 +388,9 @@ function RegisterPage() {
           </fieldset>
 
           <fieldset className="space-y-3">
-            <legend className="text-sm font-semibold">Paying for other players too?</legend>
+            <legend className="text-sm font-semibold">
+              {hireHours ? "Who's playing with you?" : "Paying for other players too?"}
+            </legend>
             <p className="text-sm text-muted-foreground">
               Add each friend's name. You pay once and one pass checks the whole group in.
             </p>
@@ -441,6 +499,13 @@ function RegisterPage() {
           <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
             <ShieldCheck className="size-3.5" />
             Your pass includes a QR code and a 6-digit check-in code.
+          </p>
+          <p className="flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <Phone className="size-3.5" />
+            For more inquiries, contact
+            <a href={`tel:${CLUB.contactPhone}`} className="font-semibold text-foreground hover:text-primary">
+              {CLUB.contactPhone}
+            </a>
           </p>
         </form>
       </section>
