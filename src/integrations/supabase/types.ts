@@ -47,6 +47,7 @@ export type Database = {
           created_at: string
           full_name: string
           guests: Json
+          hire_hours: number | null
           id: string
           membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string | null
@@ -74,6 +75,7 @@ export type Database = {
           created_at?: string
           full_name: string
           guests?: Json
+          hire_hours?: number | null
           id?: string
           membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           guests?: Json
+          hire_hours?: number | null
           id?: string
           membership?: Database["public"]["Enums"]["membership_type"]
           paid_at?: string | null
@@ -166,6 +169,7 @@ export type Database = {
           created_at: string
           full_name: string
           guests: Json
+          hire_hours: number
           membership: Database["public"]["Enums"]["membership_type"]
           paid_at: string
           payment_status: Database["public"]["Enums"]["payment_status"]
@@ -173,6 +177,7 @@ export type Database = {
           phone: string
           play_time: string
           qr_reference: string
+          received_by_name: string
           session: Database["public"]["Enums"]["session_slot"]
           session_date: string
           sport: Database["public"]["Enums"]["sport_type"]
@@ -194,6 +199,7 @@ export type Database = {
         Args: {
           _full_name: string
           _guests?: Json
+          _hire_hours?: number
           _membership: Database["public"]["Enums"]["membership_type"]
           _payment_type: Database["public"]["Enums"]["payment_type"]
           _phone: string
