@@ -193,3 +193,15 @@ export function formatDateTime(ts: string | null) {
     minute: "2-digit",
   });
 }
+
+// WhatsApp chat link to any Nigerian number (0803... → 234803...).
+export function toWhatsappNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("234")) return digits;
+  if (digits.startsWith("0")) return `234${digits.slice(1)}`;
+  return digits;
+}
+
+export function whatsappTo(phone: string, text: string) {
+  return `https://wa.me/${toWhatsappNumber(phone)}?text=${encodeURIComponent(text)}`;
+}

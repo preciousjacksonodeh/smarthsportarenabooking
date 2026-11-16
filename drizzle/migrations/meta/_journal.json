@@ -36,6 +36,13 @@
       "when": 1794552448832,
       "tag": "0004_football_flat_price_pitch_hire_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794836492003,
+      "tag": "0005_player_help_chat",
+      "breakpoints": true
     }
   ]
 }
