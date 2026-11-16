@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookingQrRouteImport } from './routes/booking-qr'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ReceiptRefRouteImport } from './routes/receipt.$ref'
 import { Route as TicketRefRouteImport } from './routes/ticket.$ref'
 
@@ -41,6 +42,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceiptRefRoute = ReceiptRefRouteImport.update({
   id: '/receipt/$ref',
   path: '/receipt/$ref',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/chat': typeof ApiChatRoute
   '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/chat': typeof ApiChatRoute
   '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
@@ -75,16 +83,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/booking-qr': typeof BookingQrRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/api/chat': typeof ApiChatRoute
   '/receipt/$ref': typeof ReceiptRefRoute
   '/ticket/$ref': typeof TicketRefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/booking-qr' | '/admin' | '/receipt/$ref' | '/ticket/$ref'
+    | '/'
+    | '/auth'
+    | '/booking-qr'
+    | '/admin'
+    | '/api/chat'
+    | '/receipt/$ref'
+    | '/ticket/$ref'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/booking-qr' | '/admin' | '/receipt/$ref' | '/ticket/$ref'
+    | '/'
+    | '/auth'
+    | '/booking-qr'
+    | '/admin'
+    | '/api/chat'
+    | '/receipt/$ref'
+    | '/ticket/$ref'
   id:
     | '__root__'
     | '/'
@@ -92,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/booking-qr'
     | '/_authenticated/admin'
+    | '/api/chat'
     | '/receipt/$ref'
     | '/ticket/$ref'
   fileRoutesById: FileRoutesById
@@ -101,6 +123,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BookingQrRoute: typeof BookingQrRoute
+  ApiChatRoute: typeof ApiChatRoute
   ReceiptRefRoute: typeof ReceiptRefRoute
   TicketRefRoute: typeof TicketRefRoute
 }
@@ -142,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/receipt/$ref': {
       id: '/receipt/$ref'
       path: '/receipt/$ref'
@@ -175,6 +205,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BookingQrRoute: BookingQrRoute,
+  ApiChatRoute: ApiChatRoute,
   ReceiptRefRoute: ReceiptRefRoute,
   TicketRefRoute: TicketRefRoute,
 }
