@@ -1,4 +1,7 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerFn } from "@tanstack/react-start";
+
+import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { CLUB, formatMoney, formatPlayTime, formatSessionDate, PAYMENT_TYPE_LABEL, parseGuests, sessionLabel, SPORT_LABEL } from "@/lib/club";
@@ -7,7 +10,7 @@ import { BOOKING_COLUMNS, bookingLine, totalsText, type Booking } from "./bookin
 import { askOnce } from "./gateway.server";
 import { arenaFacts } from "./knowledge";
 
-type AuthedContext = { supabase: any; userId: string };
+type AuthedContext = { supabase: SupabaseClient<Database>; userId: string };
 
 async function assertAdmin(context: AuthedContext) {
   const { data, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
