@@ -146,7 +146,7 @@ function Dashboard({ myId }: { myId: string }) {
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       <CheckInBar />
       <Tabs defaultValue="players">
-        <TabsList>
+        <TabsList className="h-auto max-w-full flex-wrap justify-start">
           <TabsTrigger value="players">Players & payments</TabsTrigger>
           <TabsTrigger value="ai">AI helper</TabsTrigger>
           <TabsTrigger value="chats">Player chats</TabsTrigger>

@@ -45,7 +45,7 @@ function Card({ icon, title, sub, children }: { icon: React.ReactNode; title: st
   );
 }
 
-function Answer({ pending, text, error, waitingLabel }: { pending: boolean; text?: string; error?: Error | null; waitingLabel: string }) {
+function Answer({ pending, text, error, waitingLabel }: { pending: boolean; text: string | undefined; error: Error | null; waitingLabel: string }) {
   if (pending) return <Shimmer className="text-sm">{waitingLabel}</Shimmer>;
   if (error) return <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error.message}</p>;
   if (!text) return null;
