@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { Banknote, Building2, Loader2, LogOut, QrCode, ScanLine, Search, ShieldOff } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
+import { AdminAiPanel } from "@/components/courtside/ai/AdminAiPanel";
+import { PlayerChats } from "@/components/courtside/ai/PlayerChats";
+import { ReminderButton } from "@/components/courtside/ai/ReminderDialog";
 import { CheckinStatusPill, PaymentStatusPill } from "@/components/courtside/StatusPill";
 import { useAdminActions } from "@/components/courtside/use-admin-actions";
 import { Button } from "@/components/ui/button";
@@ -143,8 +146,10 @@ function Dashboard({ myId }: { myId: string }) {
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       <CheckInBar />
       <Tabs defaultValue="players">
-        <TabsList>
+        <TabsList className="h-auto max-w-full flex-wrap justify-start">
           <TabsTrigger value="players">Players & payments</TabsTrigger>
+          <TabsTrigger value="ai">AI helper</TabsTrigger>
+          <TabsTrigger value="chats">Player chats</TabsTrigger>
           <TabsTrigger value="staff">Staff</TabsTrigger>
         </TabsList>
         <TabsContent value="players" className="mt-5 space-y-5">
@@ -157,6 +162,12 @@ function Dashboard({ myId }: { myId: string }) {
           </div>
           <Stats rows={rows} />
           <RegistrationList rows={rows} loading={isLoading} />
+        </TabsContent>
+        <TabsContent value="ai" className="mt-5">
+          <AdminAiPanel />
+        </TabsContent>
+        <TabsContent value="chats" className="mt-5">
+          <PlayerChats />
         </TabsContent>
         <TabsContent value="staff" className="mt-5">
           <StaffPanel myId={myId} />
@@ -445,11 +456,13 @@ function RowActions({ r }: { r: Registration }) {
   const { confirmTransfer, recordCash, checkIn } = useAdminActions();
   const a = availableActions(r);
   const busy = confirmTransfer.isPending || recordCash.isPending || checkIn.isPending;
-  if (!a.checkIn && !a.confirmTransfer && !a.recordCash) {
+  const remind = r.checkin_status !== "CHECKED_IN";
+  if (!a.checkIn && !a.confirmTransfer && !a.recordCash && !remind) {
     return <p className="text-right text-xs text-muted-foreground md:text-right">Done</p>;
   }
   return (
     <div className="flex flex-wrap gap-2 md:justify-end">
+      {remind && <ReminderButton r={r} />}
       {a.confirmTransfer && (
         <Button size="sm" variant="outline" disabled={busy} onClick={() => confirmTransfer.mutate(r.id)}>
           Confirm transfer

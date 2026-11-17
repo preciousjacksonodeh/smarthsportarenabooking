@@ -13,3 +13,6 @@
 - [x] Bank account 0010761765 + inquiry number 09072163509
 - [x] Payment receipts
 - [x] Football ₦2,000 for everyone; pitch hire 1h ₦20,000 / 2h ₦35,000
+- [ ] AI: player help chat (saved for staff), admin day summary, admin question box, WhatsApp reminder writer
+- [x] Ignore .env.* files (keep .env.example) in .gitignore
+- [ ] Security review follow-ups (ticket privacy, slot capacity, admin sign-up, chat hardening) — waiting on user to choose

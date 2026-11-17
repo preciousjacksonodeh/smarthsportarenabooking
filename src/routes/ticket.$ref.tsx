@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Banknote, Building2, Check, CheckCircle2, Clock, Copy, Loader2, MessageCircle, Phone, ReceiptText, ShieldCheck } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
+import { HelpChat } from "@/components/courtside/ai/HelpChat";
 import { CheckinStatusPill, PaymentStatusPill } from "@/components/courtside/StatusPill";
 import { useAdminActions } from "@/components/courtside/use-admin-actions";
 import { Button } from "@/components/ui/button";
@@ -271,6 +272,7 @@ function TicketPage() {
 
         {me?.isAdmin && <AdminTicketPanel qrRef={t.qr_reference} />}
       </div>
+      {!me?.isAdmin && <HelpChat />}
     </div>
   );
 }

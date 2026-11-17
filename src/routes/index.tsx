@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ArrowRight, Banknote, Building2, CalendarDays, Clock, Dribbble, Loader2, Phone, ShieldCheck, Trophy, UserPlus, Users, X } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
+import { HelpChat } from "@/components/courtside/ai/HelpChat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -509,6 +510,7 @@ function RegisterPage() {
           </p>
         </form>
       </section>
+      <HelpChat />
     </div>
   );
 }
