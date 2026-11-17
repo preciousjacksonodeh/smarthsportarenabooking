@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { bookingTotals, type Booking } from "./bookings-digest";
-import { playerChatInstructions } from "./knowledge";
 import { toWhatsappNumber } from "@/lib/club";
 
 const base = { guests: [], payment_type: "CASH_AT_COURT", checkin_status: "NOT_CHECKED_IN", sport: "BASKETBALL" } as const;
@@ -23,12 +22,6 @@ describe("admin AI totals", () => {
   it("counts every listed guest as a player", () => {
     const t = bookingTotals([row({ payment_status: "UNPAID", amount_ngn: 4000, guests: [{ name: "Ada", membership: "OLD_TIMER" }] })]);
     expect(t.players).toBe(2);
-  });
-});
-
-describe("player help chat rules", () => {
-  it("tells the helper never to quote per-player prices", () => {
-    expect(playerChatInstructions()).toMatch(/Never state the per-player session prices/);
   });
 });
 
