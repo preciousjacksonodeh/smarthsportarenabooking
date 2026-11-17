@@ -68,10 +68,11 @@ export default function HelpChatPanel({ onClose }: { onClose: () => void }) {
           type="button"
           size="sm"
           variant="ghost"
+          aria-label="Start over"
           onClick={startOver}
           className="text-court-foreground hover:bg-court-foreground/10 hover:text-court-foreground"
         >
-          <RotateCcw /> Start over
+          <RotateCcw /> <span className="hidden sm:inline">Start over</span>
         </Button>
         <CloseChatButton onClick={onClose} />
       </header>
