@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ChevronDown, Loader2, Trash2 } from "lucide-react";
 
+import { MessageResponse } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateTime } from "@/lib/club";
@@ -79,7 +80,7 @@ export function PlayerChats() {
                   <div className="space-y-2 bg-muted/40 px-4 py-3">
                     {c.chat_messages.map((m) => (
                       <div key={m.id} className={cn("max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap", m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-card")}>
-                        {m.content}
+                        {m.role === "assistant" ? <MessageResponse>{m.content}</MessageResponse> : m.content}
                       </div>
                     ))}
                   </div>
