@@ -148,6 +148,7 @@ function Dashboard({ myId }: { myId: string }) {
       <Tabs defaultValue="players">
         <TabsList className="h-auto max-w-full flex-wrap justify-start">
           <TabsTrigger value="players">Players & payments</TabsTrigger>
+          <TabsTrigger value="receipts">Receipts</TabsTrigger>
           <TabsTrigger value="ai">AI helper</TabsTrigger>
           <TabsTrigger value="chats">Player chats</TabsTrigger>
           <TabsTrigger value="staff">Staff</TabsTrigger>
@@ -162,6 +163,9 @@ function Dashboard({ myId }: { myId: string }) {
           </div>
           <Stats rows={rows} />
           <RegistrationList rows={rows} loading={isLoading} />
+        </TabsContent>
+        <TabsContent value="receipts" className="mt-5">
+          <ReceiptsPanel />
         </TabsContent>
         <TabsContent value="ai" className="mt-5">
           <AdminAiPanel />
@@ -464,13 +468,13 @@ function RowActions({ r }: { r: Registration }) {
     <div className="flex flex-wrap gap-2 md:justify-end">
       {remind && <ReminderButton r={r} />}
       {a.confirmTransfer && (
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => confirmTransfer.mutate(r.id)}>
-          Confirm transfer
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => confirmTransfer.mutate({ id: r.id, ref: r.qr_reference })}>
+          Approve transfer
         </Button>
       )}
       {a.recordCash && (
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => recordCash.mutate(r.id)}>
-          Record cash
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => recordCash.mutate({ id: r.id, ref: r.qr_reference })}>
+          Approve cash
         </Button>
       )}
       {a.checkIn && (
@@ -575,5 +579,73 @@ function ReceiptLink({ r }: { r: { payment_status: string; qr_reference: string 
     >
       Receipt →
     </Link>
+  );
+}
+
+function ReceiptsPanel() {
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["registrations", "receipts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("registrations")
+        .select("*")
+        .eq("payment_status", "PAID")
+        .order("paid_at", { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return data;
+    },
+  });
+  const total = data.reduce((n, r) => n + r.amount_ngn, 0);
+
+  return (
+    <section className="rounded-2xl border bg-card">
+      <div className="flex flex-wrap items-end justify-between gap-2 border-b p-4">
+        <div>
+          <p className="font-semibold">Payment receipts</p>
+          <p className="text-sm text-muted-foreground">A receipt is created the moment you approve a transfer or cash payment.</p>
+        </div>
+        {data.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {data.length} receipts · <strong className="text-foreground">{formatMoney(total)}</strong>
+          </p>
+        )}
+      </div>
+      {isLoading ? (
+        <div className="grid place-items-center py-10">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : data.length === 0 ? (
+        <p className="p-6 text-center text-sm text-muted-foreground">No approved payments yet.</p>
+      ) : (
+        <ul className="divide-y">
+          {data.map((r) => {
+            const extra = parseGuests(r.guests).length;
+            return (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">
+                    {r.full_name}
+                    {extra > 0 && <span className="font-normal text-muted-foreground"> + {extra}</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDateTime(r.paid_at)} · <RecordedBy r={r} />
+                  </p>
+                  <p className="font-mono text-xs text-muted-foreground">{r.qr_reference}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-display text-lg">{formatMoney(r.amount_ngn)}</span>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/receipt/$ref" params={{ ref: r.qr_reference }}>
+                      Open receipt
+                    </Link>
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

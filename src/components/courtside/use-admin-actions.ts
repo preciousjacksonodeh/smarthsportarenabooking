@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPlayTime, sessionLabel, type SessionSlot } from "@/lib/club";
@@ -33,30 +34,35 @@ type CheckInResult =
 
 export function useAdminActions() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const receiptAction = (ref: string) => ({
+    label: "View receipt",
+    onClick: () => navigate({ to: "/receipt/$ref", params: { ref } }),
+  });
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["registrations"] });
     qc.invalidateQueries({ queryKey: ["ticket"] });
   };
 
   const confirmTransfer = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id }: { id: string; ref: string }) => {
       const { error } = await supabase.rpc("admin_confirm_transfer", { _id: id });
       if (error) throw error;
     },
-    onSuccess: () => {
-      toast.success("Bank transfer confirmed — marked as paid.");
+    onSuccess: (_d, { ref }) => {
+      toast.success("Transfer approved — QR pass unlocked and receipt ready.", { action: receiptAction(ref) });
       refresh();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const recordCash = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id }: { id: string; ref: string }) => {
       const { error } = await supabase.rpc("admin_record_cash", { _id: id });
       if (error) throw error;
     },
-    onSuccess: () => {
-      toast.success("Cash payment recorded under your name.");
+    onSuccess: (_d, { ref }) => {
+      toast.success("Cash approved under your name — QR pass unlocked and receipt ready.", { action: receiptAction(ref) });
       refresh();
     },
     onError: (e: Error) => toast.error(e.message),

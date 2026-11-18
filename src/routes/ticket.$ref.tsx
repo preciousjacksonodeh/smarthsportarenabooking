@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery }
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Banknote, Building2, Check, CheckCircle2, Clock, Copy, Loader2, MessageCircle, Phone, ReceiptText, ShieldCheck } from "lucide-react";
+import { Banknote, Building2, Check, CheckCircle2, Clock, Copy, Loader2, LockKeyhole, MessageCircle, Phone, ReceiptText, ShieldCheck } from "lucide-react";
 
 import { Brand } from "@/components/courtside/Brand";
 import { HelpChat } from "@/components/courtside/ai/HelpChat";
@@ -13,12 +13,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { availableActions } from "@/lib/admin-actions";
 import { meQueryOptions } from "@/lib/auth";
+import { passView } from "@/lib/public-ticket";
 import {
   CLUB,
   MEMBERSHIP_LABEL,
   PAYMENT_TYPE_LABEL,
   SPORT_LABEL,
-  formatDateTime,
   formatMoney,
   formatPlayTime,
   formatSessionDate,
@@ -33,7 +33,7 @@ const ticketQuery = (ref: string) =>
   queryOptions({
     queryKey: ["ticket", ref],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_ticket", { _ref: ref });
+      const { data, error } = await supabase.rpc("get_public_ticket", { _ref: ref });
       if (error) throw error;
       return data?.[0] ?? null;
     },
@@ -122,8 +122,9 @@ function TicketPage() {
 
   if (!t) return null;
   const ticketUrl = typeof window !== "undefined" ? `${window.location.origin}/ticket/${t.qr_reference}` : t.qr_reference;
-  const paid = t.payment_status === "PAID";
-  const guests = parseGuests(t.guests);
+  const view = passView(t);
+  const paid = view.showReceipt;
+  const groupSize = t.guest_count + 1;
   const otherType: PaymentType = t.payment_type === "BANK_TRANSFER" ? "CASH_AT_COURT" : "BANK_TRANSFER";
 
   return (
@@ -141,20 +142,11 @@ function TicketPage() {
             </p>
             <h1 className="font-display mt-2 text-4xl">{sessionLabel(t.session)}</h1>
             <p className="font-display mt-1 text-2xl text-accent">{formatPlayTime(t.play_time)}</p>
-            <p className="mt-3 text-lg font-semibold">{t.full_name}</p>
-            <p className="text-sm text-court-foreground/70">{t.phone}</p>
-            {guests.length > 0 && (
-              <div className="mt-4 border-t border-court-foreground/25 pt-3">
-                <p className="eyebrow text-accent">Group of {guests.length + 1} · paid by {t.full_name.split(" ")[0]}</p>
-                <ol className="mt-2 space-y-1 text-sm">
-                  {guests.map((g, i) => (
-                    <li key={i} className="flex justify-between gap-3">
-                      <span className="font-semibold">{g.name}</span>
-                      <span className="text-court-foreground/70">{MEMBERSHIP_LABEL[g.membership]}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+            <p className="mt-3 text-lg font-semibold">{t.holder_name}</p>
+            {t.guest_count > 0 && (
+              <p className="eyebrow mt-3 border-t border-court-foreground/25 pt-3 text-accent">
+                Group of {groupSize} · one pass admits everyone
+              </p>
             )}
           </header>
 
@@ -164,8 +156,8 @@ function TicketPage() {
             <span className="rounded-full border border-border px-3 py-1 text-xs font-medium">
               {t.hire_hours
                 ? hireLabel(t.hire_hours)
-                : guests.length > 0
-                  ? `${guests.length + 1} players`
+                : t.guest_count > 0
+                  ? `${groupSize} players`
                   : MEMBERSHIP_LABEL[t.membership]}{" "}
               · {formatMoney(t.amount_ngn)}
             </span>
@@ -173,37 +165,54 @@ function TicketPage() {
           </div>
 
           <div className="flex flex-col items-center px-6 py-6">
-            <div className="rounded-xl border-2 border-foreground/10 bg-card p-4 text-foreground">
-              <QRCodeSVG value={ticketUrl} size={196} fgColor="currentColor" bgColor="transparent" level="M" />
-            </div>
-            <p className="eyebrow mt-5 text-muted-foreground">Check-in code</p>
-            <p className="mt-1 font-mono text-4xl font-bold tracking-[0.3em] text-foreground">{t.checkin_code}</p>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">Ref {t.qr_reference}</p>
+            {view.showQr ? (
+              <>
+                <div className="rounded-xl border-2 border-foreground/10 bg-card p-4 text-foreground">
+                  <QRCodeSVG value={ticketUrl} size={196} fgColor="currentColor" bgColor="transparent" level="M" />
+                </div>
+                <p className="eyebrow mt-5 text-muted-foreground">Check-in code</p>
+                <p className="mt-1 font-mono text-4xl font-bold tracking-[0.3em] text-foreground">{t.checkin_code}</p>
+              </>
+            ) : view.state === "checked_in" ? (
+              <div className="flex flex-col items-center gap-2 py-6 text-center">
+                <CheckCircle2 className="size-12 text-paid" />
+                <p className="font-semibold">Pass used — checked in</p>
+              </div>
+            ) : (
+              <div className="flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border bg-muted/40 px-6 py-8 text-center">
+                <LockKeyhole className="size-10 text-muted-foreground" />
+                <p className="font-semibold">QR pass locked</p>
+                <p className="text-sm text-muted-foreground">
+                  Your QR pass and check-in code appear here once an admin approves your payment.
+                </p>
+              </div>
+            )}
+            <p className="mt-3 font-mono text-xs text-muted-foreground">Ref {t.qr_reference}</p>
           </div>
 
           <div className="ticket-tear mx-6" />
 
           <section className="space-y-4 px-6 py-6">
-            {t.checkin_status === "CHECKED_IN" ? (
+            {view.state === "checked_in" ? (
               <StateNote icon={<CheckCircle2 className="text-paid" />} title="You're checked in">
-                Checked in {formatDateTime(t.checked_in_at)}. Enjoy the session!
+                Enjoy the session!
               </StateNote>
-            ) : paid ? (
-              <StateNote icon={<ShieldCheck className="text-paid" />} title="Paid — you're all set">
-                Show this QR code or your 6-digit code at the court to check in{guests.length > 0 ? " — it admits your whole group" : ""}.
+            ) : view.state === "ready" ? (
+              <StateNote icon={<ShieldCheck className="text-paid" />} title="Payment approved — you're all set">
+                Show this QR code or your 6-digit code at the court to check in{t.guest_count > 0 ? " — it admits your whole group" : ""}.
               </StateNote>
-            ) : t.payment_status === "AWAITING_CASH" ? (
+            ) : view.state === "awaiting_cash" ? (
               <StateNote icon={<Banknote className="text-awaiting" />} title={`Bring ${formatMoney(t.amount_ngn)} cash`}>
-                Pay an admin at the court. They'll record your payment and check you in.
+                Pay an admin at the court and give them your ref. Once they approve the payment, your QR pass appears here.
               </StateNote>
-            ) : t.payment_status === "PENDING_BANK_TRANSFER" ? (
-              <StateNote icon={<Clock className="text-pending" />} title="Confirming your transfer">
-                We've noted your transfer. This page updates once an admin confirms it.
+            ) : view.state === "pending_transfer" ? (
+              <StateNote icon={<Clock className="text-pending" />} title="Waiting for admin approval">
+                We've noted your transfer. Your QR pass appears here once an admin approves your payment.
               </StateNote>
             ) : (
               <>
                 <StateNote icon={<Building2 className="text-unpaid" />} title={`Transfer ${formatMoney(t.amount_ngn)}`}>
-                  Use your reference as the transfer description, then tap the button below.
+                  Use your reference as the transfer description, then tap the button below. Your QR pass unlocks once an admin approves the payment.
                 </StateNote>
                 <div className="divide-y rounded-lg border bg-muted/50 px-4">
                   <CopyRow label="Bank" value={CLUB.bank.bankName} />
@@ -237,7 +246,7 @@ function TicketPage() {
               <Button asChild variant="outline" className="w-full">
                 <a
                   href={whatsappLink(
-                    `Hello ${CLUB.name}, here is my transfer receipt for booking ${t.qr_reference} (${t.full_name}, ${formatMoney(t.amount_ngn)}).`,
+                    `Hello ${CLUB.name}, here is my transfer receipt for booking ${t.qr_reference} (${t.holder_name}, ${formatMoney(t.amount_ngn)}).`,
                   )}
                   target="_blank"
                   rel="noreferrer"
@@ -314,13 +323,13 @@ function AdminTicketPanel({ qrRef }: { qrRef: string }) {
           </Button>
         )}
         {a.confirmTransfer && (
-          <Button variant="outline" disabled={busy} onClick={() => confirmTransfer.mutate(row.id)}>
-            Confirm bank transfer received
+          <Button variant="outline" disabled={busy} onClick={() => confirmTransfer.mutate({ id: row.id, ref: row.qr_reference })}>
+            Approve bank transfer received
           </Button>
         )}
         {a.recordCash && (
-          <Button variant="outline" disabled={busy} onClick={() => recordCash.mutate(row.id)}>
-            Record {formatMoney(row.amount_ngn)} cash payment
+          <Button variant="outline" disabled={busy} onClick={() => recordCash.mutate({ id: row.id, ref: row.qr_reference })}>
+            Approve {formatMoney(row.amount_ngn)} cash payment
           </Button>
         )}
         {!a.checkIn && !a.confirmTransfer && !a.recordCash && (

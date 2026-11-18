@@ -43,6 +43,13 @@
       "when": 1794836492003,
       "tag": "0005_player_help_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794979458223,
+      "tag": "0006_public_ticket_privacy",
+      "breakpoints": true
     }
   ]
 }

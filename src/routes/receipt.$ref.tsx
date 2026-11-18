@@ -1,10 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle2, MessageCircle, Printer } from "lucide-react";
 
 import logo from "@/assets/smart_sports_arena_logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { meQueryOptions } from "@/lib/auth";
 import {
   CLUB,
   MEMBERSHIP_LABEL,
@@ -23,7 +24,7 @@ const receiptQuery = (ref: string) =>
   queryOptions({
     queryKey: ["ticket", ref],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_ticket", { _ref: ref });
+      const { data, error } = await supabase.rpc("get_public_ticket", { _ref: ref });
       if (error) throw error;
       return data?.[0] ?? null;
     },
@@ -70,8 +71,21 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 function ReceiptPage() {
   const { ref } = Route.useParams();
   const { data: t } = useSuspenseQuery(receiptQuery(ref));
+  const { data: me } = useQuery(meQueryOptions);
+  const isAdmin = !!me?.isAdmin;
+  // Phone, every player's name and the receiving admin are staff-only details.
+  const { data: full } = useQuery({
+    queryKey: ["registrations", "by-ref", t?.qr_reference ?? ref],
+    enabled: isAdmin && !!t,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("registrations").select("*").eq("qr_reference", t!.qr_reference).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
   if (!t) return null;
-  const guests = parseGuests(t.guests);
+  const guests = full ? parseGuests(full.guests) : [];
+  const receivedBy = full ? (full.cash_recorded_by_name ?? full.transfer_confirmed_by_name) : null;
 
   if (t.payment_status !== "PAID") {
     return (
@@ -92,13 +106,21 @@ function ReceiptPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:py-10 print:p-0">
       <div className="mx-auto mb-5 flex max-w-md flex-wrap items-center justify-between gap-2 print:hidden">
-        <Link to="/ticket/$ref" params={{ ref: t.qr_reference }} className="text-sm font-semibold text-primary hover:underline">
-          ← My pass
-        </Link>
+        {isAdmin ? (
+          <Link to="/admin" className="text-sm font-semibold text-primary hover:underline">
+            ← Dashboard
+          </Link>
+        ) : (
+          <Link to="/ticket/$ref" params={{ ref: t.qr_reference }} className="text-sm font-semibold text-primary hover:underline">
+            ← My pass
+          </Link>
+        )}
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
             <a
-              href={whatsappLink(`My ${CLUB.name} receipt ${t.qr_reference}: ${window.location.href}`)}
+              href={whatsappLink(
+                `${CLUB.name} payment receipt ${t.qr_reference}: ${formatMoney(t.amount_ngn)} paid on ${formatDateTime(t.paid_at)} for ${SPORT_LABEL[t.sport]}, ${formatSessionDate(t.session_date)} ${formatPlayTime(t.play_time)}.`,
+              )}
               target="_blank"
               rel="noreferrer"
             >
@@ -132,8 +154,8 @@ function ReceiptPage() {
           <Row label="Receipt no." value={<span className="font-mono">{t.qr_reference}</span>} />
           <Row label="Paid on" value={formatDateTime(t.paid_at)} />
           <Row label="Payment method" value={PAYMENT_TYPE_LABEL[t.payment_type]} />
-          {t.received_by_name && <Row label="Received by" value={t.received_by_name} />}
-          <Row label="Paid by" value={`${t.full_name} · ${t.phone}`} />
+          {receivedBy && <Row label="Received by" value={receivedBy} />}
+          <Row label="Paid by" value={full ? `${full.full_name} · ${full.phone}` : t.holder_name} />
           <Row label="Sport" value={SPORT_LABEL[t.sport]} />
           <Row
             label="Session"
@@ -141,7 +163,7 @@ function ReceiptPage() {
           />
           <Row
             label="Booking"
-            value={t.hire_hours ? hireLabel(t.hire_hours) : guests.length > 0 ? `${guests.length + 1} players` : MEMBERSHIP_LABEL[t.membership]}
+            value={t.hire_hours ? hireLabel(t.hire_hours) : t.guest_count > 0 ? `${t.guest_count + 1} players` : MEMBERSHIP_LABEL[t.membership]}
           />
         </dl>
 
@@ -149,7 +171,7 @@ function ReceiptPage() {
           <div className="pt-4 text-sm">
             <p className="font-semibold">Players</p>
             <ol className="mt-1 list-decimal pl-5 text-muted-foreground">
-              <li>{t.full_name}</li>
+              <li>{full?.full_name}</li>
               {guests.map((g, i) => (
                 <li key={i}>{g.name}</li>
               ))}

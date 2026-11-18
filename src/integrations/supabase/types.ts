@@ -209,6 +209,26 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_public_ticket: {
+        Args: { _ref: string }
+        Returns: {
+          amount_ngn: number
+          checkin_code: string
+          checkin_status: Database["public"]["Enums"]["checkin_status"]
+          guest_count: number
+          hire_hours: number
+          holder_name: string
+          membership: Database["public"]["Enums"]["membership_type"]
+          paid_at: string
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          payment_type: Database["public"]["Enums"]["payment_type"]
+          play_time: string
+          qr_reference: string
+          session: Database["public"]["Enums"]["session_slot"]
+          session_date: string
+          sport: Database["public"]["Enums"]["sport_type"]
+        }[]
+      }
       get_ticket: {
         Args: { _ref: string }
         Returns: {

@@ -17,3 +17,6 @@
 - [x] Ignore .env.* files (keep .env.example) in .gitignore
 - [ ] Security review follow-ups (ticket privacy, slot capacity, admin sign-up, chat hardening) — waiting on user to choose
 - [ ] Remove test data (AI Test Player booking, 2 test chats) — user declined deletion; waiting on user
+- [x] Pass only shows QR after admin approves payment; admins see receipts in the app (Receipts tab)
+- [x] Ticket privacy: public pass/receipt hide phone, check-in code (until paid), guest names, staff names
+- [ ] Turn off the old pass lookup after the app is republished — waiting on user to publish
